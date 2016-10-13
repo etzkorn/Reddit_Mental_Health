@@ -38,7 +38,7 @@ post.vars =
       }
       
 ### get text for all posts in directory
-      data.dir = "Data/One_Day_Depression_Sample/depression 01-06-2016 30-06-2016/"
+      data.dir = "Data/June_Depression_Sample/depression 01-06-2016 30-06-2016/"
       all.files = dir(data.dir)[grep("json", dir(data.dir))]
 
       comm.data <- data.frame()
@@ -59,5 +59,5 @@ post.vars =
       rm(all.files, comm.vars, file.json, file.name, get_comments,
          get_children, get_posts, get_reply_list, post.vars,
          data.dir, bad.file)
-      save.image(file="Data/June_Posts.RData")
+      save.image(file="Data/June_Depression_Sample/June_Posts.RData")
 
