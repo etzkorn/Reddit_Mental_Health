@@ -1,0 +1,66 @@
+---
+title: "Project Outline"
+author: "Lacey Etzkorn"
+date: "September 16, 2016"
+output: 
+      html_document:
+            toc: TRUE
+---
+
+# Motivation
+The goal of this project is to explore how people interact with online communities in regards to their own mental health. Specifically, we will collect data on Reddit, since this platform presents some unique opportunities for studying mental health:
+
+* People post anonymously under a user name, which allows us to connect comments to common users and monitor user comments across time and subreddits.
+
+* People often feel comfortable posting some (not all) personal thoughts and feelings on reddit, so we have access to some information people might not readily admit to health researchers.
+
+# Possible Questions
+
+* Understand post features of people who post on /r/depression. These features include: average time between posts. Average sentiment of posts. Difference in average sentiment of posts before and after suicide ideation. Proportion of posts in /r/depression or mental health-related subreddits.
+
+* Predict suicide ideation using past user information. This past user information might include: Sentiment, Revealed Clinical Information, Relationship Status.
+
+* Test whether features of comments on suicide ideation posts are associated with eventual outcomes. These outcomes might include: net increase in average sentiment, subsequent suicide ideation, etc...
+
+# Data Collection Outline 
+
+We first scraped all posts and comments from /r/depression in the month of June 2016 using the package [insert package] with 5 minute intervals.
+From now on, we will collectively refer to posts and comments as posts.
+We then classified whether each post contained evidence of suicide ideation (SI). 
+Details on the algorithm for classifying SI in posts is detailed in a subsequent section.
+Once posts are classified, we identify the unique users who had any SI post, and then we download each of their post histories using our own program for querying the reddit API.
+Since Reddit caps API requests to 1000 items, we are only able to grab the most recent 1000 posts and 1000 comments each for each user, so data on comments prior to 1000 posts and 1000 comments respectively are censored.
+
+Once we have post histories for each user that had identified SI, we reclassify all of their comments with SI.
+
+* Apply suicide ideation algorithm to this longitudional data
+
+# Data
+
+## June Data from /r/depression
+We scraped 4,841 posts and 17,200 comments from the month of June 2016 representing 3,784 and 5,563 unique authors respectively.
+The post data contained 385 identified admissions of suicide ideation from 364 unique authors.
+The post data contained 162 identified admissions of suicide ideation from 147 unique authors.
+Altogether, we identified 492 authors with admissions of suicide ideation in the month of June.
+
+## Author Post History Data
+After collecting post trajectories for each author with SI in June, we were unable to find any post or comment from just one author.
+
+
+# What we are stuck on
+
+#### Downloading user-specific post trajectories: 
+
+* We need to loop through a list of users we have previously identified as having suicide ideation and grab all of their posts. 
+
+* We don't know how to get to this json file via the API package PRAW. Is there another way to do this?
+
+* We don't know the equivalent to clicking the "next" button.
+
+# Methods
+
+Entire reddit post trajectories were scraped for users who had a direct admission of suicide ideation in a post or comment in the month of June 2016.
+
+Posts were classified as containing evidence of suicidal ideation if the post contained one of the phrases
+
+

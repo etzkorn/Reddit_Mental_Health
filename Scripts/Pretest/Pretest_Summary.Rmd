@@ -1,0 +1,103 @@
+---
+title: "Pretest Summary"
+author: "Lacey Etzkorn"
+date: "September 23, 2016"
+output: 
+      html_document:
+            toc: TRUE
+---
+
+```{r setup, echo=FALSE}
+### Set WD
+      setwd("/Users/etzkornlacey15/Documents/Reddit_Suicide/Pretest/")
+      library(dplyr)
+### Load Pretest Data
+      pretest.lacey <- read.csv(file="lacey_classified_pretest.csv",
+                                stringsAsFactors = F)
+      pretest.linda <- read.csv(file="linda_classified_pretest.csv", 
+                                stringsAsFactors = F) %>%
+            select(X, suicidal, suicidal.past, mental.disorder)
+      pretest <- merge(pretest.lacey, pretest.linda, 
+                       by = c("X"), suffixes=c(".lacey", ".linda"))
+### Correct Misspecified Values
+      bad0 <- c("00", "o", "")
+      pretest$suicidal.lacey <- as.numeric(ifelse(pretest$suicidal.lacey %in% bad0, "0", pretest$suicidal.lacey))
+      pretest$suicidal.linda <- as.numeric(ifelse(pretest$suicidal.linda %in% bad0, "0", pretest$suicidal.linda))
+      pretest$suicidal.past.lacey <- as.numeric(ifelse(pretest$suicidal.past.lacey %in% bad0, 
+                                            "0", pretest$suicidal.past.lacey))
+      pretest$suicidal.past.linda <- as.numeric(ifelse(pretest$suicidal.past.linda %in% bad0, 
+                                            "0", pretest$suicidal.past.linda))
+```
+
+# Correct Mistakes
+
+```{r}
+pretest <- mutate(pretest, 
+                  suicidal = suicidal.linda + suicidal.lacey > 0,
+                  suicidal.past = suicidal.past.linda + suicidal.past.lacey > 0,
+                  mental.disorder = mental.disorder.linda + mental.disorder.lacey > 0) 
+### Current
+      pretest$suicidal[38] <- T
+      pretest$suicidal[46] <- T 
+      pretest$suicidal[55] <- F 
+      pretest$suicidal[76] <- T 
+      pretest$suicidal[95] <- T 
+      pretest$suicidal[90] <- T 
+
+      
+### Past
+      pretest$suicidal.past[4] <- F 
+      pretest$suicidal.past[31] <- F 
+      pretest$suicidal.past[60] <- T 
+      pretest$suicidal.past[95] <- T 
+      pretest$suicidal.past[104] <- T 
+
+### Mental Condition
+      pretest$mental.disorder[8] <- T
+      pretest$mental.disorder[26] <- F
+      pretest$mental.disorder[30] <- T
+      pretest$mental.disorder[49] <- T
+      pretest$mental.disorder[76] <- F
+      pretest$mental.disorder[98] <- T
+      pretest$mental.disorder[102] <- T
+```
+
+# Check Blanks
+
+```{r}
+prop.table(table(pretest$text ==""))
+pretest <- filter(pretest, !pretest$text=="")
+```
+
+# Tabulate by Person
+
+```{r}
+      with(pretest, table(suicidal.linda, suicidal.lacey))
+      with(pretest, table(suicidal.past.linda, suicidal.past.lacey))
+      with(pretest, table(mental.disorder.linda, mental.disorder.lacey))
+```
+
+### Look at Posts by Reddit
+
+```{r}
+      
+### Tabulate by Subreddit
+      with(pretest, table(subreddit, suicidal))
+      with(pretest, table(subreddit, suicidal.past))
+      with(pretest, table(subreddit, mental.disorder))
+      with(pretest, table(subreddit))
+
+### Tabulate Outcomes
+      with(pretest, table(suicidal, mental.disorder))
+### Distribution of dates
+      hist(pretest$date)
+```
+
+### Save Data
+
+```{r}
+pretest <- 
+pretest %>% 
+select(title,subreddit,author,date,text,suicidal,suicidal.past)
+save(pretest, file="Pretest_Cleaned_Data.RData")
+```

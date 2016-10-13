@@ -1,0 +1,79 @@
+This document contains phrases that we think constitute suicidal ideation from the subreddit /r/depression.
+
+Suicidal Phrases: 
+
+Direct admission of ideation:
+	[I am] [intentioning verb] [suicide verb]
+	I [intention verb] [suicide verb]
+	[I am] [think verb] [suicide noun]
+	I [possess] [think noun] [suicide noun]
+
+Lack of desire to live:
+	I [oppose verb] [live verb]
+
+
+Hypotheticals:
+	If I [suicide verb]
+	If I were to [suicide verb]
+	If I [intention verb] [suicide verb]
+
+Question
+	Why not [suicide verb]
+
+
+
+########################################################################
+Observed Phrases:
+
+I [intention verb] [suicide verb]
+	i want to simply die
+	i want to die
+	I just really want to die
+	I don't want to be here anymore
+	I want to disappear
+	I want to stop hurting
+	I just want to no longer be here whatsoever
+	i'd like to commit suicide
+	I just want to go away
+	I'd just like to take some pills and just pass away in my sleep
+	i decided to end it
+	I'm not afriad to die
+	I'll kill myself
+	i had to end it
+	I'll die peacefully
+
+Me [suicide noun]
+	me killing myself
+	ending my life
+
+I [think verb] [suicide noun] ###
+	I think about dying
+	i’m always imagining death
+	i've been thinking of different ways to just off myself
+
+I [oppose verb] [live verb] ###
+	I can't keep living
+	I'm so tired of existing
+
+Why not [suicide verb] ###
+	why not suicide
+
+[think noun] [suicide noun]
+	thoughts of suicide would fill my head
+	thoughts of suicide fill my head
+	thoughts of suicide are still present
+	imagining myself dead
+
+[suicide noun] is [all, what] I [think verb]
+	killing myself is all I think about
+
+I have nothing to [live verb] for.
+	I have nothing left to live for.
+
+Other
+	suicide as much as it is seen as selfish is a luxury in my eyes
+	tonight I held the razor to my wrist
+
+
+TM package for text mining
+	stop words

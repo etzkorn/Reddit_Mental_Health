@@ -1,0 +1,37 @@
+4: no past
+6: not sure
+8: mental disorder
+26: no clear evidence of depression
+30: has mental disorder
+31: not past
+38: current ideation
+46: current
+49: psych.disorder
+55: not suicidal
+66: unclear 
+60: past suicidal
+76: suicidal, no mental disorder
+84: unclear
+95: suicidal present and past
+98: psych condition
+102: psych condition
+104: suicidal past
+
+should we count addiction, eating disorders, and self harm?
+should we classify based on the subreddit, title
+
+Suicidal Present:
+
+Suicidal Past:
+
+Psych Condition:
+      INCLUDE 
+            * references to/speculation about one's depression as a
+            true medical condition, but not a state of emotion
+                  * if unclear whether casual, NOT a psychiatric condition
+                  * casual + psychiatrist or meds = TRUE
+            * medications for depression that the person is taking/considering taking,
+            * reference to the person's own psychiatrist
+            
+      EXCLUDE 
+            * casual references to depression to express emotion,
