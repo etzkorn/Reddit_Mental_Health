@@ -1,4 +1,3 @@
-
 load(file = "Data/June_Posts.RData")
 source("Suicide_Classification_Algorithms/ideation_phrases.R")
 

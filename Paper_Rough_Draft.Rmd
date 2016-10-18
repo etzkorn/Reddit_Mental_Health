@@ -1,0 +1,124 @@
+---
+title: "Paper"
+author: "Lacey Etzkorn"
+date: "October 13, 2016"
+output: html_document
+---
+
+# Motivation
+
+A problem that online forums and communities face is suicide. Numerous concerns have been raised over the impact that participating in online communities has on individual health, especially when the community surrounds issues of mental health and 
+
+It would benefit moderators of these online communities to be able to study the impact of their moderation policies have on the health of the community users. 
+
+In some instances, moderators have cited how seemingly benign policies have actually harmed the mental health of community users. For example, reddit moderator [name] cites the policy that they used to remove posts containing SI content in fear that the SI content would spread to others... [Re-Read suicide watch article]
+
+Before moderators can evaluate the effect of a policy on mental health, it would benefit them to have a set of validated outcomes to measure their policies against. This is a difficult problem because many relevant health outcomes are not observable by internet community moderators. They only have posting information, and possibly login information. Things such as depression severity, other biomarkers, lifestyle factors, mortality, and even the outcome of suicide are not measurable from the moderator's perspective.
+
+Some previous research has developed some outcomes that might be relevant to public health research. Choudhury et al. develop models for detecting and understanding user-specific shifts to and from suicidal ideation on reddit.
+
+However, another outcome relevant to mental health board moderators might be the actual outcome of suicide since suicide might be a major problem in some internet communities. As far as we know, there is no published work on identifying suicides from online mental health board data.
+
+This is probably because this is an impossible problem for which there is no data. However, it is still worth attempting to understand the best estimate we can get from this data. A next best option could be to estimate the rate at which users abandon their user accounts. A more tractable, intermediate outcome could be the identification of users who have stopped using reddit. This intermediate outcome of the users who have stopped using reddit must be a super-set of users who may have committed suicide. In this sense we can place an upper bound on the proportion of reddit users who actually commit suicide given the proportion of reddit users who stop using reddit.
+
+
+# Methods
+
+The identification of whether a user has stopped using reddit could be done using the user-specific distribution of times between posts. We can compare the time from data collection to the most recent post and compare this to the user-specific distribution of times between posts to get some sort of bayes estimate of whether the user has stopped using reddit.
+
+After doing a brief literature review, it seems that studying mental health via social media is an emerging field. As far as we can tell, Munmun de Choudhury at Georgia Tech leads field of using social media to study mental health and online communities and social interactions. We have found a number of papers from her that will be especially pertinent to us as we continue our research. We will continue to look for papers from other authors in her citations.
+
+To adress the first two questions, we scraped all available comment and post data from /r/depression for the month of June. The package [insert package] was used to scrape this data. The month June was chosen to ensure that we sould have three months of follow-up time for SI classified users. An earlier month wasn't chosen because Reddit censors user comment and post history to the most recent 1,000 comments and 1,000 posts each.
+
+We then classified the text from each post and comment according to whether it contained SI evidence. Details of this classification process are described in a subsequent section. Then, we produced a list of unique user ids associated with any SI evidence. With this list, we then went back to the reddit API, and scraped the comment and post history for each user. 
+
+### SI Classification
+
+Our goal four our SI classification algorithm was to produce a set of comments that almost certainly contained only true SI comments. Hence, we set out to maximize specificity while throwing sensitivity out the window. While we recognize that could be many algorithms better suited for our final goal of estimating the incidence of suicide in our population, we were fine to just make something that worked for now.
+
+[Definition of Suicidal Ideation]
+
+We began by reading through a sample of 100 randomly selected comments from various mental health subreddits to get a sense of how people expressed suicidal ideation on Reddit in general. From each of the SI comments from this 100, we extracted the smallest phrase(s) that contained evidence of SI. Examples of these phrase bits include: 
+
+* "I think about suicide"
+* "I just don't want to live""
+* "I have struggled with depression and suicidal thoughts"
+* "my suicide plan"
+* "I still feel like blowing my brains out"
+
+We then categoized these phrases into 12 linguistically distinct modes of expressing SI, adding extra where we felt appropriate:
+
+Intention to, or thoughts of suicide/dying:
+* [I am] [intending to] [suicide verb]
+* [I am] [thinking about] [suicide noun]
+* I [intend to] [suicide verb]
+* I [suicide verb]
+* [I am] [suicide adjective]
+* Why not [suicide verb]
+* I [think about] [suicide noun]
+* I [think]
+* me [suicide verb]
+* me [suicide noun]
+
+Oppose life:
+* [I] [oppose] [live noun]
+* [I] [am opposed to] [living]
+
+For each of these modes of SI expression, we generated all possible combinations of words for each category to get all possible phrases for that mode. For example, to generate all possible phrases for  "I [intend to] [suicide verb]", we combined the "intend to" verbs 
+
+      want to, were to, would like to, wish to, decided to, decide to, am not afraid to, am not scared to, have to, had to, try to, tried to, would like to, can, will, must, might, should, could, intend to, intended to, have come to, 've come to, ‘d like to, ‘d, ‘ll
+      
+with the suicide verbs
+
+      die, commit suicide, kill myself, off myself, end my life, no longer be here, take some pills, leave this world, end it, blow my brains out, kicked the bucket, kick the bucket, cut my throat, hang myself
+
+After all phrases for all 12 modes of SI expression have been generated, we remove all punctuation and spacing from both the post text and the phrase text. We combine all phrases into a regular expression using the or "|" operator, and then use the function "grepl" to test whether each post contains any phrase.
+
+### Estimation
+
+# Results
+
+### June /r/depression
+
+For the month of June, /r/depression contained [n] posts, representing contributions from [n] authors. We identified [n] comments with SI evidence from [n] unique users. 
+
+In a sample of 100 SI-positive posts, [n] did not have true SI evidence. In a sample of 100 SI-negative posts, [n] did have SI evidence. 
+
+### User Follow-Up
+
+After scraping the post history for each of the SI-positive users, we find no post or comment data for [n] users, and we find [n] users whose comments and posts were censored by June. We are then left with [n] users. 
+
+
+# Discussion
+
+Online communities present a unique platform where people can address their own mental health concerns. 
+
+A online community such as the depression subreddit provides a unique opportunity for researchers to glimpse into the thoughts of people with depression outside of a clinical setting. The depression subreddit is a public community where users do not need to present any identifiable information. 
+
+### Limitations
+
+For this method, we only incorporate user specific information as the time between posts. However, a number of other factors might give us information about whether a user actually attempts suicide. Sentiment might matter. Recent SI posts might matter. Actual suicide notes might matter.
+
+We do not differentiate between suicidal ideation and suicide notes. 
+
+We also cannot observe unsuccessful suicide attempts.
+
+### Future Direction
+
+In order to get a working lower-bound on reddit drop-out, it may be good to run this method on sample of users from non-mental-health-related subreddits in june to get a sense of general rates of reddit-drop-out. We might then be able to then take the difference in rate of drop out among SI-positive users and SI-negative users to estimate the depression+SI attributable drop out rate.
+
+# Works Cited
+
+* Discovering Shifts to Suicidal Ideation from Mental Health Content in Social Media (2016) http://www.munmund.net/pubs/chi16_SuicidalIdeation.pdf 
+
+* Social Media as a Measurement Tool of Depression in Populations (2013) http://www.munmund.net/pubs/websci_13.pdf
+
+* Predicting Postpartum Changes in Emotion and Behavior via Social Media (2013) http://www.munmund.net/pubs/chi_13.pdf
+
+* Not All Moods are Created Equal! Exploring Human Emotional States in Social Media (2012) http://www.munmund.net/pubs/icwsm_12_1.pdf
+
+* Happy, Nervous or Surprised? Classification of Human Affective States in Social Media (2011) http://www.munmund.net/pubs/icwsm_12_2.pdf
+
+* Recovery Amid Pro-Anorexia: Analysis of Recovery in Social Media (2016) http://www.munmund.net/pubs/chi16_TumblrRecovery.pdf
+
+
