@@ -1,36 +1,53 @@
 ---
-title: "Paper"
+title: "Do Reddit /r/depression Authors who Pen Suicidal Ideation Leave Reddit at Higher Rates?"
 author: "Lacey Etzkorn"
-date: "October 13, 2016"
-output: html_document
+date: "October 18, 2016"
+output: 
+      html_document:
+            toc: TRUE
 ---
+
+```{r setup, include=FALSE}
+require(ggplot2); require(dplyr); require(reshape2)
+options(width = 90)
+options(digits = 4)
+```
 
 # Motivation
 
-A problem that online forums and communities face is suicide. Numerous concerns have been raised over the impact that participating in online communities has on individual health, especially when the community surrounds issues of mental health and 
+The problem of suicide plagues social media and online communities devoted to mental health. [add context] 
 
-It would benefit moderators of these online communities to be able to study the impact of their moderation policies have on the health of the community users. 
+Social media has also learned to fight back. [add context]
 
-In some instances, moderators have cited how seemingly benign policies have actually harmed the mental health of community users. For example, reddit moderator [name] cites the policy that they used to remove posts containing SI content in fear that the SI content would spread to others... [Re-Read suicide watch article]
+Given the delicate relationship between social media and suicide, it is of utmost importance that community moderators study the impacts of their policies on their community's risk of suicide. There are numerous stories of how seemingly benign changes in community moderation policies have exacerbated user's poor mental health status. For example, [give example].
 
-Before moderators can evaluate the effect of a policy on mental health, it would benefit them to have a set of validated outcomes to measure their policies against. This is a difficult problem because many relevant health outcomes are not observable by internet community moderators. They only have posting information, and possibly login information. Things such as depression severity, other biomarkers, lifestyle factors, mortality, and even the outcome of suicide are not measurable from the moderator's perspective.
+Currently, moderators do not have data-intensive tools to evaluate the impact of policies on suicide risk. [Do they?]. This is due, in part, to the lack of data available to moderators. In most cases, it is impossible for moderators to observe actual outcomes of suicide, especially when users are anonymous. Surrogate outcomes for suicide are currently in development. For example, Munmun de Choudhury uses [linguistic machine learning methods] to identify and predict user-specific shifts from discussing poor mental health to discussing suicide ideation. However, detecting suicidal ideation in user posts has limited utility when the desired outcome is a rate of suicide.
 
-Some previous research has developed some outcomes that might be relevant to public health research. Choudhury et al. develop models for detecting and understanding user-specific shifts to and from suicidal ideation on reddit.
-
-However, another outcome relevant to mental health board moderators might be the actual outcome of suicide since suicide might be a major problem in some internet communities. As far as we know, there is no published work on identifying suicides from online mental health board data.
-
-This is probably because this is an impossible problem for which there is no data. However, it is still worth attempting to understand the best estimate we can get from this data. A next best option could be to estimate the rate at which users abandon their user accounts. A more tractable, intermediate outcome could be the identification of users who have stopped using reddit. This intermediate outcome of the users who have stopped using reddit must be a super-set of users who may have committed suicide. In this sense we can place an upper bound on the proportion of reddit users who actually commit suicide given the proportion of reddit users who stop using reddit.
-
+In this paper, we propose a more direct method for estimating rates of suicide from social media data. [Do we actually do this?] We do this by estimating the rate at which users who admit to having suicidal ideation (SI) stop posting on Reddit. We then compare the drop-out rates between SI-positive and SI-negative users. Though our method is thoroughly problematic in its current state, we believe that, with a proper amount of statistical development and validation, it has the potential to become a decent measure of suicide rates in online mental health communities.
 
 # Methods
 
-The identification of whether a user has stopped using reddit could be done using the user-specific distribution of times between posts. We can compare the time from data collection to the most recent post and compare this to the user-specific distribution of times between posts to get some sort of bayes estimate of whether the user has stopped using reddit.
+[give methods overview]
 
-After doing a brief literature review, it seems that studying mental health via social media is an emerging field. As far as we can tell, Munmun de Choudhury at Georgia Tech leads field of using social media to study mental health and online communities and social interactions. We have found a number of papers from her that will be especially pertinent to us as we continue our research. We will continue to look for papers from other authors in her citations.
+### Data
 
-To adress the first two questions, we scraped all available comment and post data from /r/depression for the month of June. The package [insert package] was used to scrape this data. The month June was chosen to ensure that we sould have three months of follow-up time for SI classified users. An earlier month wasn't chosen because Reddit censors user comment and post history to the most recent 1,000 comments and 1,000 posts each.
+Our target population is Reddit authors who post in the subreddit /r/depression in the month of June. Hence, we scrape all available (as of October 10, 2016) comment and post data from /r/depression for the month of June using the python package [insert package]. The month June was chosen to ensure that we have at least three months of follow-up time for each author. An earlier month wasn't chosen because Reddit censors author comment and post history to the most recent 1,000 items each. Henceforth we will refer to comments and posts collectively as posts.
 
-We then classified the text from each post and comment according to whether it contained SI evidence. Details of this classification process are described in a subsequent section. Then, we produced a list of unique user ids associated with any SI evidence. With this list, we then went back to the reddit API, and scraped the comment and post history for each user. 
+We then identified whether the text from each post contained evidence of suicidal ideation (SI) according to our classification algorithm. Details of this classification process are described in a subsequent section. Then, we produced one list of unique author ids associated with any SI evidence as well as one equal-sized list of unique authors without any SI evidence. We then scraped the post history for both lists of authors and identified posts with SI evidence.
+
+### Estimation of Drop-Out Rates
+
+
+
+First, we assume that the posting histories of each author are a Poisson Process, and so times between posts are exponentially distributed with some author-specific mean $mu_i$ where $i$ indexes the authors. For each $\mu_i$, we can specify the prior distribution $1/\mu_i \sim gamma(1,1)$. Hence the posterior for $\mu_i$ is $1/\mu_i|n,\bar{\epsilon} \sim gamma(1 + n, 1 + n\cdot\bar{\epsilon})$, where n is the author's number of intervals between posts, and $\bar{\epsilon}$ is the user-specific average time between posts.
+
+Now if we specify a prior probability that any author drops out of reddit $\rho$, we can then directly calculate the posterior distribution of the probability they dropped out from the monte-carlo samples above. Let $t_i$ be the time between data collection and the most recent post for user $i$. This variable can be thought of the "censoring time". Then, the posterior probability that a user quits given their true time between posts is:
+$$ p_i|\mu_i   =   \frac{\rho} {e^{-\mu_i\cdot t_i} \cdot (1-\rho) + \rho} $$ 
+With this expression, we can transoform the monte-carlo samples from the posterior of $\mu_i$ to monte-carlo samples from the posterior of $p_i$.
+
+Finally, we can get the posterior distribution of the expected number of Reddit drop-outs. If $Q_i$ is the indicator that user $i$ has dropped out, then $E(\sum Q_i | p_1, p_2 ...) = E(\sum p_i | p_1, p_2 ...)$.
+
+Using this method, we generate monte-carlo samples from the posterior distribution for the expected number of drop-outs among SI-positive authors and SI-negative authors each. We can then compare these posteriors to get a sense of the number of excess reddit drop-outs that could be linked to suicide, or at least suicidal ideation.
 
 ### SI Classification
 
@@ -67,27 +84,124 @@ Oppose life:
 For each of these modes of SI expression, we generated all possible combinations of words for each category to get all possible phrases for that mode. For example, to generate all possible phrases for  "I [intend to] [suicide verb]", we combined the "intend to" verbs 
 
       want to, were to, would like to, wish to, decided to, decide to, am not afraid to, am not scared to, have to, had to, try to, tried to, would like to, can, will, must, might, should, could, intend to, intended to, have come to, 've come to, ‘d like to, ‘d, ‘ll
-      
+
 with the suicide verbs
 
       die, commit suicide, kill myself, off myself, end my life, no longer be here, take some pills, leave this world, end it, blow my brains out, kicked the bucket, kick the bucket, cut my throat, hang myself
 
 After all phrases for all 12 modes of SI expression have been generated, we remove all punctuation and spacing from both the post text and the phrase text. We combine all phrases into a regular expression using the or "|" operator, and then use the function "grepl" to test whether each post contains any phrase.
 
-### Estimation
-
 # Results
 
 ### June /r/depression
 
-For the month of June, /r/depression contained [n] posts, representing contributions from [n] authors. We identified [n] comments with SI evidence from [n] unique users. 
+For the month of June, /r/depression contained 22,041 posts, representing contributions from 7,572 authors. We identified 547 SI-positive posts from 492 unique users. 
 
 In a sample of 100 SI-positive posts, [n] did not have true SI evidence. In a sample of 100 SI-negative posts, [n] did have SI evidence. 
 
 ### User Follow-Up
 
-After scraping the post history for each of the SI-positive users, we find no post or comment data for [n] users, and we find [n] users whose comments and posts were censored by June. We are then left with [n] users. 
+```{r , echo=FALSE, message=FALSE, warning=FALSE}
+load(file="Data/SI_Author_Sample/June_Authors_Data_Classified.RData")
+author.sum =
+      user.data %>%
+      group_by(author, type) %>%
+      summarise(oldest = min(date),
+                prop.dep.post = mean(r.depression, na.rm=T),
+                n.post = n()) 
+author.sum2 = 
+      user.data %>% 
+      group_by(author) %>%
+      summarise(oldest = min(date, na.rm=T),
+                newest = max(date, na.rm=T),
+                prop.dep.post = mean(r.depression, na.rm=T),
+                n_si = sum(class, na.rm=T),
+                n.post = n())
+user.data = 
+      transmute(author.sum2, author, 
+                rank_oldest = rank(oldest),
+                rank_newest = rank(newest),
+                rank_n = rank(n.post,ties.method = "random"),
+                rank_prop = rank(prop.dep.post,ties.method = "random")) %>%
+      merge(user.data, by = "author", all.y=T)
+user.data$point.label = 
+      ifelse(user.data$class, "SI",
+      ifelse(user.data$r.depression, "/r/depression","other")) %>%
+      ordered(labels = c("other", "/r/depression", "SI"))
 
+get.date = function(day) as.POSIXct(day, origin = "1970-01-01", tz = "GMT")
+july1 = get.date("2016-07-01 00:00:00")
+june1 = get.date("2016-06-01 00:00:00")
+jan1 = get.date("2016-01-01 00:00:00")
+ggplot() +
+geom_point(data = subset(user.data, date > jan1),
+           aes(y=rank_newest,x=date, 
+               color=point.label, alpha=point.label, 
+               size=point.label)) + 
+ggtitle("Distribution of Post Dates across Authors\nbetween Jan. and Oct.") +
+ylab("Author Rank by Newest Post") + xlab("Date") +
+geom_vline(aes(xintercept = as.numeric(july1)), alpha=0.3) + 
+geom_vline(aes(xintercept = as.numeric(june1)), alpha=0.3) + 
+scale_colour_manual(values = c("grey","darkblue", "red")) + 
+scale_size_manual(values = c(0.1,0.1,0.3)) + 
+scale_alpha_manual(values = c(0.1,0.1,1)) + 
+theme_bw()
+```
+
+After scraping the post history for each of the SI-positive users, we find no post or comment data for 1 author, and we find 16 authors whose full history was not available back to April 2016. We are left with 475 authors. 
+
+The post histories for our 475 authors are depicted above. Each y value represents a unique author id, sorted by the time of their most recent post. Each x value represents the date of a post. Hence, we can read each horizontal line on this plot as the post history of one author. Red points represent SI-positive posts. Blue points represent posts in the /r/depression subreddit. Grey posts represent posts elsewhere on reddit. There a number of important features in this plot. First, we note that those authors who posted more recently tended to post more often, which is expected. Second we see that many authors made multiple SI-positive posts. Third, we see that nearly 170 of our 475 authors had their last post in June, which was the period that we used to sample from. Fourth, of these 170 authors, many did not post frequently before dropping-off reddit. However, a hand-full of them had posted frequently, and their drop-put is therefore suspicious.
+
+### Drop-Out Rate Estimates
+
+The histogram below represents the posterior distribution for the rate of drop-outs for authors whose June /r/depression comments were SI-positive.
+
+```{r, echo=FALSE, warning=FALSE}
+### Load Data
+      load(file = "Data/SI_Author_Sample/Author_Summary.RData")
+      user.summary = 
+            filter(user.summary, recent < 150) %>%
+            mutate(t = recent)
+      n = user.summary$n
+      eps = user.summary$eps
+      eps[is.na(eps)] = 0 
+      t = user.summary$t
+      N = nrow(user.summary)
+### Simulate Mu given Data
+      alpha = 1; beta = 1
+      mu = replicate(n = 10000, rgamma(N, shape = alpha + n, rate = beta + n*eps))
+### Now get overall credible interval for sum(Q)
+      prior.p = 0.000001
+      make.p = function(mu,p) p / (exp(-mu*t)*(1-p) + p)
+      post.E = colSums(apply(mu, 2, make.p, p=prior.p))/N * 100
+      hist(post.E, main = "Posterior Distribution for\nExpected Reddit Drop-Outs per 100 SI-Positive Authors\n(Prior = 10e-4)",
+           xlab="", ylab="")
+      ci = quantile(post.E, probs = c(0.025, 0.975))
+```
+
+Our 95% credible interval is (`r ci`), meaning there is a 95% probability that the expected rate of drop-out is between `r ci[1]` and `r ci[2]`.
+
+### Sensitivity to Priors
+
+We found that our conclusions were highly sensitive to our specified prior probability of drop-outs.
+
+```{r, echo=FALSE, warning=FALSE}
+### Calculate P(Q) from Mu and data
+      prior.p = c(0.5, 10^-(1:4))
+      post_p = sapply(prior.p, FUN = function(x) apply(mu, 2, make.p, p=x) %>% rowMeans)
+      colnames(post_p) = c("p.5", paste0("p10.", 1:4))
+      user.summary2 = 
+            cbind(user.summary, post_p) %>%
+            select(-recent) %>%
+            melt(id.vars = c("author", "n", "eps", "t"),
+                 value.name = "post.p", variable.name = "prior.p")
+      ggplot(user.summary2) + 
+            geom_point(aes(t, eps, color=post.p), size=0.5, alpha=0.5) + 
+            facet_wrap("prior.p") + 
+            theme_bw() + 
+            xlab("Average Days between Posts") +
+            ylab("Days since Most Recent Post")
+```
 
 # Discussion
 
@@ -103,9 +217,6 @@ We do not differentiate between suicidal ideation and suicide notes.
 
 We also cannot observe unsuccessful suicide attempts.
 
-### Future Direction
-
-In order to get a working lower-bound on reddit drop-out, it may be good to run this method on sample of users from non-mental-health-related subreddits in june to get a sense of general rates of reddit-drop-out. We might then be able to then take the difference in rate of drop out among SI-positive users and SI-negative users to estimate the depression+SI attributable drop out rate.
 
 # Works Cited
 
@@ -115,10 +226,6 @@ In order to get a working lower-bound on reddit drop-out, it may be good to run 
 
 * Predicting Postpartum Changes in Emotion and Behavior via Social Media (2013) http://www.munmund.net/pubs/chi_13.pdf
 
-* Not All Moods are Created Equal! Exploring Human Emotional States in Social Media (2012) http://www.munmund.net/pubs/icwsm_12_1.pdf
-
-* Happy, Nervous or Surprised? Classification of Human Affective States in Social Media (2011) http://www.munmund.net/pubs/icwsm_12_2.pdf
-
-* Recovery Amid Pro-Anorexia: Analysis of Recovery in Social Media (2016) http://www.munmund.net/pubs/chi16_TumblrRecovery.pdf
+* Social Media Embraces Suicide Prevention CMAJ August 11, 2015 vol. 187 no. 11 First published June 29, 2015, doi: 10.1503/cmaj.109-5104 http://www.cmaj.ca/content/187/11/E333.short 
 
 
