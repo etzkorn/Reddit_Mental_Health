@@ -13,7 +13,7 @@ options(width = 90)
 options(digits = 4)
 ```
 
-# Motivation
+# Introduction
 
 The problem of suicide plagues social media and online communities devoted to mental health. [add context] 
 
@@ -29,29 +29,39 @@ In this paper, we propose a more direct method for estimating rates of suicide f
 
 [give methods overview]
 
+The objective of our project is to quantify the risk of suicide for /r/depression authors. However, this objective is impossible for a number of reasons.
+
+Given that the desired objective is impossible, we set out to estimate a reasonable surrogate parameter that will still be useful to online community moderators. Hence, we define the following parameter.
+
+The difference in rate of dropouts
+
+The goal of our analysis is to estimate the difference in drop out rates between Reddit /r/depression authors who express suicidal ideation and /r/depression authors who don't
+
 ### Data
 
-Our target population is Reddit authors who post in the subreddit /r/depression in the month of June. Hence, we scrape all available (as of October 10, 2016) comment and post data from /r/depression for the month of June using the python package [insert package]. The month June was chosen to ensure that we have at least three months of follow-up time for each author. An earlier month wasn't chosen because Reddit censors author comment and post history to the most recent 1,000 items each. Henceforth we will refer to comments and posts collectively as posts.
+Our target population is Reddit authors who post in the subreddit /r/depression in the month of June. Hence, we scrape all available (as of October 10, 2016) comment and post data from /r/depression for the month of June using the python package subredditarchive. The month June was chosen to ensure that we have at least three months of follow-up time for each author. An earlier month wasn't chosen because Reddit censors author comment and post history to the most recent 1,000 items each. Henceforth we will refer to comments and posts collectively as posts.
 
 We then identified whether the text from each post contained evidence of suicidal ideation (SI) according to our classification algorithm. Details of this classification process are described in a subsequent section. Then, we produced one list of unique author ids associated with any SI evidence as well as one equal-sized list of unique authors without any SI evidence. We then scraped the post history for both lists of authors and identified posts with SI evidence.
 
 ### Estimation of Drop-Out Rates
 
+Our goal is to estimate the expected rate at which SI-positive and SI-negative authors stop using Reddit. Ultimately, we will compare our estimated rates between these two groups to determine if there is some association between suicidal ideation and risk of dropping-out. 
 
+First, we estimate the author-specific average time between posts $mu_i$, where $i$ indexes the authors.
+We assume that the post histories of each author are a Poisson process, and so observed times between posts are exponentially distributed with mean $mu_i$. For each $\mu_i$, we can specify the prior distribution $1/\mu_i \sim gamma(1,1)$. Hence the posterior for $\mu_i$ is $1/\mu_i|n,\bar{\epsilon} \sim gamma(1 + n, 1 + n\cdot\bar{\epsilon})$, where n is the author's number of intervals between posts, and $\bar{\epsilon}$ is the user-specific average time between posts.
 
-First, we assume that the posting histories of each author are a Poisson Process, and so times between posts are exponentially distributed with some author-specific mean $mu_i$ where $i$ indexes the authors. For each $\mu_i$, we can specify the prior distribution $1/\mu_i \sim gamma(1,1)$. Hence the posterior for $\mu_i$ is $1/\mu_i|n,\bar{\epsilon} \sim gamma(1 + n, 1 + n\cdot\bar{\epsilon})$, where n is the author's number of intervals between posts, and $\bar{\epsilon}$ is the user-specific average time between posts.
-
-Now if we specify a prior probability that any author drops out of reddit $\rho$, we can then directly calculate the posterior distribution of the probability they dropped out from the monte-carlo samples above. Let $t_i$ be the time between data collection and the most recent post for user $i$. This variable can be thought of the "censoring time". Then, the posterior probability that a user quits given their true time between posts is:
+From each $mu_i$, we are able to calculate the probability that the author has stopped using Reddit.
+Let $\rho$ be the prior probability that any author drops out of Reddit. Let $t_i$ be the time between data collection and the most recent post for user $i$. This variable can be thought of the "censoring time". Then, the posterior probability that a user quits given their true time between posts is:
 $$ p_i|\mu_i   =   \frac{\rho} {e^{-\mu_i\cdot t_i} \cdot (1-\rho) + \rho} $$ 
 With this expression, we can transoform the monte-carlo samples from the posterior of $\mu_i$ to monte-carlo samples from the posterior of $p_i$.
 
-Finally, we can get the posterior distribution of the expected number of Reddit drop-outs. If $Q_i$ is the indicator that user $i$ has dropped out, then $E(\sum Q_i | p_1, p_2 ...) = E(\sum p_i | p_1, p_2 ...)$.
+Finally, we can calculate the posterior distribution of the expected number of Reddit drop-outs. If $Q_i$ is the indicator that user $i$ has dropped out, then $E(\sum Q_i \Big | p_1, p_2 ...) = E(\sum p_i \Big | p_1, p_2 ...)$.
 
-Using this method, we generate monte-carlo samples from the posterior distribution for the expected number of drop-outs among SI-positive authors and SI-negative authors each. We can then compare these posteriors to get a sense of the number of excess reddit drop-outs that could be linked to suicide, or at least suicidal ideation.
+Using this method, we generate monte-carlo samples from the posterior distribution for the expected number of drop-outs among SI-positive authors and SI-negative authors each. We can then compare these posteriors to get a sense of the number of excess Reddit drop-outs associated with suicidal ideation.
 
 ### SI Classification
 
-Our goal four our SI classification algorithm was to produce a set of comments that almost certainly contained only true SI comments. Hence, we set out to maximize specificity while throwing sensitivity out the window. While we recognize that could be many algorithms better suited for our final goal of estimating the incidence of suicide in our population, we were fine to just make something that worked for now.
+Our goal for our SI classification algorithm was to produce a set of comments that almost certainly contained only true SI comments. Hence, we set out to maximize specificity while throwing sensitivity out the window. While we recognize that could be many algorithms better suited for our final goal of estimating the incidence of suicide in our population, we were fine to just make something that worked for now.
 
 [Definition of Suicidal Ideation]
 
@@ -150,7 +160,7 @@ theme_bw()
 
 After scraping the post history for each of the SI-positive users, we find no post or comment data for 1 author, and we find 16 authors whose full history was not available back to April 2016. We are left with 475 authors. 
 
-The post histories for our 475 authors are depicted above. Each y value represents a unique author id, sorted by the time of their most recent post. Each x value represents the date of a post. Hence, we can read each horizontal line on this plot as the post history of one author. Red points represent SI-positive posts. Blue points represent posts in the /r/depression subreddit. Grey posts represent posts elsewhere on reddit. There a number of important features in this plot. First, we note that those authors who posted more recently tended to post more often, which is expected. Second we see that many authors made multiple SI-positive posts. Third, we see that nearly 170 of our 475 authors had their last post in June, which was the period that we used to sample from. Fourth, of these 170 authors, many did not post frequently before dropping-off reddit. However, a hand-full of them had posted frequently, and their drop-put is therefore suspicious.
+The post histories for our 475 authors are depicted above. Each y value represents a unique author id, sorted by the time of their most recent post. Each x value represents the date of a post. Hence, we can read each horizontal line on this plot as the post history of one author. Red points represent SI-positive posts. Blue points represent posts in the /r/depression subreddit. Grey posts represent posts elsewhere on Reddit. There a number of important features in this plot. First, we note that those authors who posted more recently tended to post more often, which is expected. Second we see that many authors made multiple SI-positive posts. Third, we see that nearly 170 of our 475 authors had their last post in June, which was the period that we used to sample from. Fourth, of these 170 authors, many did not post frequently before dropping-off Reddit. However, a hand-full of them had posted frequently, and their drop-put is therefore suspicious.
 
 ### Drop-Out Rate Estimates
 
