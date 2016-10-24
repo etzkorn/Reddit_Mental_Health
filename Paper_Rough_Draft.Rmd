@@ -28,7 +28,7 @@ In this paper, we propose a more direct method for estimating rates of suicide f
 
 # Methods
 
-[give methods overview]
+Given that we cannot directly quantify the rate of suicide for online mental health boards, it is imperative that we develop a substitute to measure a similar construct. The construct that we propose is to estimate the total number of dropouts associated with suicidal ideation (SI).
 
 The objective of our project is to quantify the risk of suicide for /r/depression authors. However, this objective is impossible for a number of reasons.
 
@@ -157,25 +157,32 @@ The histogram below represents the posterior distribution for the rate of drop-o
 
 ```{r, echo=FALSE, warning=FALSE}
 ### Load Data
-      load(file = "Data/SI_Author_Sample/Author_Summary.RData")
-      user.summary = 
-            filter(user.summary, recent < 150) %>%
-            mutate(t = recent)
-      n = user.summary$n
-      eps = user.summary$eps
+      author.summary = 
+            user.data %>% 
+            group_by(author) %>%
+            summarise(n = n()-1,
+                      eps.bar = mean(time.last, na.rm=T),
+                      t = as.numeric(october10 - max(date)),
+                      si.author = si.author[1])
+            filter(author.summary, !t < 150)
+      n = author.summary$n
+      eps = author.summary$eps.bar
       eps[is.na(eps)] = 0 
-      t = user.summary$t
-      N = nrow(user.summary)
+      t = author.summary$t
+      N = nrow(author.summary)
+      si = author.summary$si.author
 ### Simulate Mu given Data
       alpha = 1; beta = 1
       mu = replicate(n = 10000, rgamma(N, shape = alpha + n, rate = beta + n*eps))
 ### Now get overall credible interval for sum(Q)
       prior.p = 0.000001
-      make.p = function(mu,p) p / (exp(-mu*t)*(1-p) + p)
-      post.E = colSums(apply(mu, 2, make.p, p=prior.p))/N * 100
-      hist(post.E, main = "Posterior Distribution for\nExpected Reddit Drop-Outs per 100 SI-Positive Authors\n(Prior = 10e-4)",
+      make.p = function(mu,p,t) p / (exp(-mu*t)*(1-p) + p)
+      post.si = colSums(apply(mu[si,], 2, make.p, p=prior.p, t=t[si]))
+      post.nosi = colSums(apply(mu[!si,], 2, make.p, p=prior.p, t=t[!si]))/sum(!si)*sum(si)
+      post.excess = post.si - post.nosi
+      hist(post.excess, main = "Posterior Distribution for\nExpected Reddit Drop-Outs per 100 SI-Positive Authors\n(Prior = 10e-4)",
            xlab="", ylab="")
-      ci = quantile(post.E, probs = c(0.025, 0.975))
+      ci = quantile(post.excess, probs = c(0.025, 0.975))
 ```
 
 Our 95% credible interval is (`r ci`), meaning there is a 95% probability that the expected rate of drop-out is between `r ci[1]` and `r ci[2]`.
@@ -186,20 +193,20 @@ We found that our conclusions were highly sensitive to our specified prior proba
 
 ```{r, echo=FALSE, warning=FALSE}
 ### Calculate P(Q) from Mu and data
-      prior.p = c(0.5, 10^-(1:4))
-      post_p = sapply(prior.p, FUN = function(x) apply(mu, 2, make.p, p=x) %>% rowMeans)
-      colnames(post_p) = c("p.5", paste0("p10.", 1:4))
-      user.summary2 = 
-            cbind(user.summary, post_p) %>%
-            select(-recent) %>%
-            melt(id.vars = c("author", "n", "eps", "t"),
-                 value.name = "post.p", variable.name = "prior.p")
-      ggplot(user.summary2) + 
-            geom_point(aes(t, eps, color=post.p), size=0.5, alpha=0.5) + 
-            facet_wrap("prior.p") + 
-            theme_bw() + 
-            xlab("Average Days between Posts") +
-            ylab("Days since Most Recent Post")
+      prior.p = 10^-seq(0.5,15.5, by=0.5)
+      post_p = sapply(prior.p, FUN = function(x){
+            post.si = colSums(apply(mu[si,], 2, make.p, p=x, t=t[si]))
+            post.nosi = colSums(apply(mu[!si,], 2, make.p, p=x, t=t[!si]))/sum(!si)*sum(si)
+            post.excess = post.si - post.nosi
+            return(quantile(post.excess, probs = c(0.025, 0.5, 0.975)))
+      })
+      colnames(post_p) = paste0("p10e-", seq(0.5,15.5, by=0.5))
+      post_p = cbind(Percentile = rownames(post_p), as.data.frame(post_p))
+      post_p = melt(post_p, id.vars = "Percentile", 
+                    variable.name = "Prior P",
+                    value.name = "Estimate")
+      ggplot(post_p)
+
 ```
 
 # Discussion
