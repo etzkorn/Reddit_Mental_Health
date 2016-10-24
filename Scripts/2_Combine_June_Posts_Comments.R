@@ -1,5 +1,5 @@
 ### Setup
-      load(file="Data/June_Depression_Sample/June_Posts.RData")
+      load(file="Data/June_NoSI_Authors_Data.RData")
       library(dplyr)
       
 ### Define Functions

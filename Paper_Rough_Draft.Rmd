@@ -11,6 +11,7 @@ output:
 require(ggplot2); require(dplyr); require(reshape2)
 options(width = 90)
 options(digits = 4)
+load("June_Authors_Combined.RData")
 ```
 
 # Introduction
@@ -31,9 +32,11 @@ In this paper, we propose a more direct method for estimating rates of suicide f
 
 The objective of our project is to quantify the risk of suicide for /r/depression authors. However, this objective is impossible for a number of reasons.
 
+Another potential es
+
 Given that the desired objective is impossible, we set out to estimate a reasonable surrogate parameter that will still be useful to online community moderators. Hence, we define the following parameter.
 
-The difference in rate of dropouts
+The difference in rate of dropouts 
 
 The goal of our analysis is to estimate the difference in drop out rates between Reddit /r/depression authors who express suicidal ideation and /r/depression authors who don't
 
@@ -112,40 +115,26 @@ In a sample of 100 SI-positive posts, [n] did not have true SI evidence. In a sa
 ### User Follow-Up
 
 ```{r , echo=FALSE, message=FALSE, warning=FALSE}
-load(file="Data/SI_Author_Sample/June_Authors_Data_Classified.RData")
-author.sum =
-      user.data %>%
-      group_by(author, type) %>%
-      summarise(oldest = min(date),
-                prop.dep.post = mean(r.depression, na.rm=T),
-                n.post = n()) 
-author.sum2 = 
-      user.data %>% 
-      group_by(author) %>%
-      summarise(oldest = min(date, na.rm=T),
-                newest = max(date, na.rm=T),
-                prop.dep.post = mean(r.depression, na.rm=T),
-                n_si = sum(class, na.rm=T),
-                n.post = n())
 user.data = 
-      transmute(author.sum2, author, 
-                rank_oldest = rank(oldest),
-                rank_newest = rank(newest),
-                rank_n = rank(n.post,ties.method = "random"),
-                rank_prop = rank(prop.dep.post,ties.method = "random")) %>%
+      author.summary %>%
+      group_by(author) %>%
+      filter(newest == max(newest)) %>%
+      ungroup %>%
+      group_by(si.author)%>%
+      transmute(author, rank_newest = rank(newest)) %>%
+      ungroup %>%
+      select(-si.author) %>%
       merge(user.data, by = "author", all.y=T)
 user.data$point.label = 
       ifelse(user.data$class, "SI",
       ifelse(user.data$r.depression, "/r/depression","other")) %>%
       ordered(labels = c("other", "/r/depression", "SI"))
-
-get.date = function(day) as.POSIXct(day, origin = "1970-01-01", tz = "GMT")
-july1 = get.date("2016-07-01 00:00:00")
-june1 = get.date("2016-06-01 00:00:00")
-jan1 = get.date("2016-01-01 00:00:00")
-ggplot() +
-geom_point(data = subset(user.data, date > jan1),
-           aes(y=rank_newest,x=date, 
+user.data$si.group = 
+      ifelse(user.data$si.author, "SI-Positive in June /r/depression",
+             "SI-Negative in June /r/depression")
+### Make plot
+ggplot(data = subset(user.data, date > jan1)) +
+geom_point(aes(y=rank_newest,x=date, 
                color=point.label, alpha=point.label, 
                size=point.label)) + 
 ggtitle("Distribution of Post Dates across Authors\nbetween Jan. and Oct.") +
@@ -155,7 +144,7 @@ geom_vline(aes(xintercept = as.numeric(june1)), alpha=0.3) +
 scale_colour_manual(values = c("grey","darkblue", "red")) + 
 scale_size_manual(values = c(0.1,0.1,0.3)) + 
 scale_alpha_manual(values = c(0.1,0.1,1)) + 
-theme_bw()
+theme_bw() + facet_wrap("si.group")
 ```
 
 After scraping the post history for each of the SI-positive users, we find no post or comment data for 1 author, and we find 16 authors whose full history was not available back to April 2016. We are left with 475 authors. 

@@ -11,7 +11,7 @@ clean.text <-function(x){
 }
 
 ### Read in the suicide lexicon
-words <- readLines("Scripts/2.2_SI_Classification/Suicide_Syntax.txt")
+words <- readLines("Scripts/SI_Classification/Suicide_Syntax.txt")
 words <- gsub("\t","",words)
 word.list <- list()
 category <- ""
