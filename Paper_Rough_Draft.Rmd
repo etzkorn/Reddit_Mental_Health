@@ -1,7 +1,7 @@
 ---
-title: "Do Reddit /r/depression Authors who Pen Suicidal Ideation Leave Reddit at Higher Rates?"
+title: "Reddit /r/Depression Authors who Pen Suicidal Ideation Leave Reddit at Higher Rates"
 author: "Lacey Etzkorn"
-date: "October 18, 2016"
+date: "October 24, 2016"
 output: 
       html_document:
             toc: TRUE
@@ -11,7 +11,7 @@ output:
 require(ggplot2); require(dplyr); require(reshape2)
 options(width = 90)
 options(digits = 4)
-load("June_Authors_Combined.RData")
+load("Data/SI_Author_Sample/June_Authors_Combined.RData")
 ```
 
 # Introduction
@@ -22,33 +22,35 @@ Social media has also learned to fight back. [add context]
 
 Given the delicate relationship between social media and suicide, it is of utmost importance that community moderators study the impacts of their policies on their community's risk of suicide. There are numerous stories of how seemingly benign changes in community moderation policies have exacerbated user's poor mental health status. For example, [give example].
 
-Currently, moderators do not have data-intensive tools to evaluate the impact of policies on suicide risk. [Do they?]. This is due, in part, to the lack of data available to moderators. In most cases, it is impossible for moderators to observe actual outcomes of suicide, especially when users are anonymous. Surrogate outcomes for suicide are currently in development. For example, Munmun de Choudhury uses [linguistic machine learning methods] to identify and predict user-specific shifts from discussing poor mental health to discussing suicide ideation. However, detecting suicidal ideation in user posts has limited utility when the desired outcome is a rate of suicide.
+Currently, moderators do not have data-intensive tools to evaluate the impact of policies on suicide risk. [Do they?]. This is due, in part, to the lack of data available to moderators. In most cases, it is impossible for moderators to observe actual outcomes of suicide, especially when users are anonymous. Surrogate outcomes for suicide are currently in development. For example, Munmun de Choudhury uses [linguistic machine learning methods] to identify and predict user-specific shifts from discussing poor mental health to discussing suicide ideation [CITATION]. However, detecting suicidal ideation in user posts has limited utility when the desired outcome is a rate of suicide.
 
-In this paper, we propose a more direct method for estimating rates of suicide from social media data. [Do we actually do this?] We do this by estimating the rate at which users who admit to having suicidal ideation (SI) stop posting on Reddit. We then compare the drop-out rates between SI-positive and SI-negative users. Though our method is thoroughly problematic in its current state, we believe that, with a proper amount of statistical development and validation, it has the potential to become a decent measure of suicide rates in online mental health communities.
+We propose an alternative parameter, similar in idea to a suicide rate, that community moderators could estimate with available data: the excess expected number of Reddit authors who abandon their accounts (drop out) after expressing suicidal ideation (SI). When we use the term "excess", we refer to the number of dropouts above what we would expect from an equal-sized comparable sample of authors who did not express suicidal ideation. This parameter is only defined for a population of authors who write in a given online community during a given time interval. For example, in this paper we define our population as the set of Reddit authors who post in /r/depression during the month of June 2016. We compare the number of dropouts from the authors who expressed suicidal ideation in June /r/depression (SI-postive authors), to a random sample of authors who did not express suicidal ideation in June /r/depression (SI-negative users). 
+
+Though our method is thoroughly problematic in its current state, we believe that, with a proper amount of statistical development and validation, it has the potential to become a decent measure of suicide rates in online mental health communities.
 
 # Methods
 
-Given that we cannot directly quantify the rate of suicide for online mental health boards, it is imperative that we develop a substitute to measure a similar construct. The construct that we propose is to estimate the total number of dropouts associated with suicidal ideation (SI).
+The objective of our project is to estimate the number of suicides for /r/depression authors who post in the month of June 2016. However, this objective is impossible given the available Reddit data. Since we cannot directly quantify the rate of suicide among online mental health boards, we propose an estimable surrogate parameter for a suicide rate: the excess expected number of drop-outs among SI-positive June /r/depression authors. 
 
-The objective of our project is to quantify the risk of suicide for /r/depression authors. However, this objective is impossible for a number of reasons.
+The process of collecting the necessary data and estimating this parameter can be broken down into 4 modular steps:
 
-Another potential es
+* Collect all posts and comments from /r/depression in June 2016. (See data collection.)
 
-Given that the desired objective is impossible, we set out to estimate a reasonable surrogate parameter that will still be useful to online community moderators. Hence, we define the following parameter.
+* Classify whether each post or comment contained evidence of SI. Label authors as SI-positive if they had any posts or comments with SI in June 2016 /r/depression. Otherwise they are SI-negative. (See SI Classification.)
 
-The difference in rate of dropouts 
+* Collect all available post and comment data for every SI-positive authors. Collect all available post and comment data for a similar-sized simple random sample of SI-negative authors. [Code Reference]
 
-The goal of our analysis is to estimate the difference in drop out rates between Reddit /r/depression authors who express suicidal ideation and /r/depression authors who don't
+* Estimate the number of drop-outs for each the SI-postitive and SI-negative groups. Subtract the latter estimate from the former to get an estimate of the number of excess dropouts among SI-positive authors. (See Estimation of Drop-Out Totals.)
 
-### Data
+* If a bayesian approach was used, examine the relationship between the estimate and the priors.
 
-Our target population is Reddit authors who post in the subreddit /r/depression in the month of June. Hence, we scrape all available (as of October 10, 2016) comment and post data from /r/depression for the month of June using the python package subredditarchive. The month June was chosen to ensure that we have at least three months of follow-up time for each author. An earlier month wasn't chosen because Reddit censors author comment and post history to the most recent 1,000 items each. Henceforth we will refer to comments and posts collectively as posts.
+### Data Collection
 
-We then identified whether the text from each post contained evidence of suicidal ideation (SI) according to our classification algorithm. Details of this classification process are described in a subsequent section. Then, we produced one list of unique author ids associated with any SI evidence as well as one equal-sized list of unique authors without any SI evidence. We then scraped the post history for both lists of authors and identified posts with SI evidence.
+Our target population is Reddit authors who post in the subreddit /r/depression in the month of June. Hence, we scrape all available (as of 4pm October 10, 2016) comment and post data from /r/depression for the month of June using the python package subredditarchive [cite]. The month June was chosen to ensure that we have at least three months of follow-up time for each author. An earlier month wasn't chosen because Reddit censors author comment and post history to the most recent 1,000 items each.
 
-### Estimation of Drop-Out Rates
+### Estimation of Drop-Out Totals
 
-Our goal is to estimate the expected rate at which SI-positive and SI-negative authors stop using Reddit. Ultimately, we will compare our estimated rates between these two groups to determine if there is some association between suicidal ideation and risk of dropping-out. 
+Our goal is to estimate the number of drop-outs for each SI-positive and SI-negative groups. Ultimately, we will compare our estimated drop-outs between these two groups to determine if there is some association between suicidal ideation and risk of dropping-out. 
 
 First, we estimate the author-specific average time between posts $mu_i$, where $i$ indexes the authors.
 We assume that the post histories of each author are a Poisson process, and so observed times between posts are exponentially distributed with mean $mu_i$. For each $\mu_i$, we can specify the prior distribution $1/\mu_i \sim gamma(1,1)$. Hence the posterior for $\mu_i$ is $1/\mu_i|n,\bar{\epsilon} \sim gamma(1 + n, 1 + n\cdot\bar{\epsilon})$, where n is the author's number of intervals between posts, and $\bar{\epsilon}$ is the user-specific average time between posts.
@@ -64,45 +66,55 @@ Using this method, we generate monte-carlo samples from the posterior distributi
 
 ### SI Classification
 
-Our goal for our SI classification algorithm was to produce a set of comments that almost certainly contained only true SI comments. Hence, we set out to maximize specificity while throwing sensitivity out the window. While we recognize that could be many algorithms better suited for our final goal of estimating the incidence of suicide in our population, we were fine to just make something that worked for now.
+The goal for our classification algorithm is to determine whether comments and posts contain expressions of suicidal ideation. From these classifications, we produce a set of authors that express SI in June /r/Depression. 
 
-[Definition of Suicidal Ideation]
+The CDC defines suicidal ideation, or thoughts about suicide, as "thoughts of engaging in suicide-related behavior" [cite] and "Thinking about, considering, or planning suicide." [cite]. We broaden this definition for our analysis to the following:
 
-We began by reading through a sample of 100 randomly selected comments from various mental health subreddits to get a sense of how people expressed suicidal ideation on Reddit in general. From each of the SI comments from this 100, we extracted the smallest phrase(s) that contained evidence of SI. Examples of these phrase bits include: 
+      Suicidal Ideation: Thinking about, considering, or planning suicide; desire to die; desire to stop living; or engagement in highly dangerous activities or self harm with the implicit goal of ending life. Suicidal ideation does not include hating or frustration with one's own life, extreme anguish or psychological distress, or engagement in highly dangerous activities or self harm where there is no implicit goal of ending one's life.
+
+It is important to note that we expected SI expression to be fairly rare among /r/Depression posts. Thus, in order to get a good estimate of the difference in drop-out rates between true SI-positive and true SI-negative authors, we wanted our SI-positive sample to have a minimal proportion of true SI-negative authors. However, we were not worried about true SI-positive authors tainting our SI-negative sample since we expected SI-positive users to be so rare. In other words, we wanted a highly specific algorithm at the sacrifice of sensitivity.
+
+We read through a sample of 750 randomly selected comments and posts from June /r/Depression, and we classify SI according to the definition above. From each of the SI-positive comments, we extract the smallest phrase(s) that contained evidence of SI. Examples of these phrases include: 
 
 * "I think about suicide"
+
 * "I just don't want to live""
+
 * "I have struggled with depression and suicidal thoughts"
+
 * "my suicide plan"
+
 * "I still feel like blowing my brains out"
 
-We then categoized these phrases into 12 linguistically distinct modes of expressing SI, adding extra where we felt appropriate:
+We then categoize collected phrases into twelve linguistically distinct modes of expressing SI. We discarded phrases that we felt were too linguistically complex for any classification algorithm to handle. The twelve modes are:
 
-Intention to, or thoughts of suicide/dying:
 * [I am] [intending to] [suicide verb]
+
 * [I am] [thinking about] [suicide noun]
+
 * I [intend to] [suicide verb]
+
 * I [suicide verb]
+
 * [I am] [suicide adjective]
+
 * Why not [suicide verb]
+
 * I [think about] [suicide noun]
-* I [think]
+
 * me [suicide verb]
+
 * me [suicide noun]
 
-Oppose life:
-* [I] [oppose] [live noun]
-* [I] [am opposed to] [living]
+* I [oppose] [live noun]
 
-For each of these modes of SI expression, we generated all possible combinations of words for each category to get all possible phrases for that mode. For example, to generate all possible phrases for  "I [intend to] [suicide verb]", we combined the "intend to" verbs 
+* I [am opposed to] [living]
 
-      want to, were to, would like to, wish to, decided to, decide to, am not afraid to, am not scared to, have to, had to, try to, tried to, would like to, can, will, must, might, should, could, intend to, intended to, have come to, 've come to, ‘d like to, ‘d, ‘ll
-
-with the suicide verbs
+The phrases or words in brackets represent a broader class of phrases that could be inserted in it's place. For example, [suicide verb] could be replaced with any of the following phrases to still consitute evidence of SI expression: 
 
       die, commit suicide, kill myself, off myself, end my life, no longer be here, take some pills, leave this world, end it, blow my brains out, kicked the bucket, kick the bucket, cut my throat, hang myself
 
-After all phrases for all 12 modes of SI expression have been generated, we remove all punctuation and spacing from both the post text and the phrase text. We combine all phrases into a regular expression using the or "|" operator, and then use the function "grepl" to test whether each post contains any phrase.
+For each of these modes of SI expression, we generate all possible combinations of phrases. After all phrases for all 12 modes of SI expression have been generated, we remove all punctuation and spacing from both the post text and the phrase text. We combine all phrases into a regular expression using the or "|" operator, and then use the function "grepl" to test whether each post contains any phrase.
 
 # Results
 
@@ -114,7 +126,7 @@ In a sample of 100 SI-positive posts, [n] did not have true SI evidence. In a sa
 
 ### User Follow-Up
 
-```{r , echo=FALSE, message=FALSE, warning=FALSE}
+```{r , echo=FALSE, message=FALSE, warning=FALSE, fig.width=10}
 user.data = 
       author.summary %>%
       group_by(author) %>%
@@ -175,7 +187,7 @@ The histogram below represents the posterior distribution for the rate of drop-o
       alpha = 1; beta = 1
       mu = replicate(n = 10000, rgamma(N, shape = alpha + n, rate = beta + n*eps))
 ### Now get overall credible interval for sum(Q)
-      prior.p = 0.000001
+      prior.p = 10^-10
       make.p = function(mu,p,t) p / (exp(-mu*t)*(1-p) + p)
       post.si = colSums(apply(mu[si,], 2, make.p, p=prior.p, t=t[si]))
       post.nosi = colSums(apply(mu[!si,], 2, make.p, p=prior.p, t=t[!si]))/sum(!si)*sum(si)
@@ -189,7 +201,9 @@ Our 95% credible interval is (`r ci`), meaning there is a 95% probability that t
 
 ### Sensitivity to Priors
 
-We found that our conclusions were highly sensitive to our specified prior probability of drop-outs.
+We found that our conclusions were highly sensitive to our specified prior probability of drop-outs. The plot below shows posterior credible intervals for the expected number of excess dropouts among authors who penned SI-positive posts in June /r/depression.
+
+If we set our prior probability of dropping out equal to 0.5, we would conclude that among the 491 authors who wrote SI-postitive posts in June /r/depression, there were only about 14 excess reddit drop-outs. However, when we set our prior probability of dropping out below $10^{-5}$, our estimates for excess dropouts associated with SI are in the range of 45 to 55.
 
 ```{r, echo=FALSE, warning=FALSE}
 ### Calculate P(Q) from Mu and data
@@ -201,13 +215,22 @@ We found that our conclusions were highly sensitive to our specified prior proba
             return(quantile(post.excess, probs = c(0.025, 0.5, 0.975)))
       })
       colnames(post_p) = paste0("p10e-", seq(0.5,15.5, by=0.5))
-      post_p = cbind(Percentile = rownames(post_p), as.data.frame(post_p))
-      post_p = melt(post_p, id.vars = "Percentile", 
-                    variable.name = "Prior P",
-                    value.name = "Estimate")
-      ggplot(post_p)
-
+      #post_p = cbind(Percentile = rownames(post_p), as.data.frame(post_p))
+      #post_p = melt(post_p, id.vars = "Percentile", 
+      #              variable.name = "Prior P",
+      #              value.name = "Estimate")
+      ggplot() +
+            geom_errorbar(aes(ymax = post_p[3,], ymin = post_p[1,], x=prior.p)) +
+            geom_point(aes(y= post_p[2,], x=prior.p)) + 
+            scale_x_log10() + 
+            xlab("Prior Probability of Quitting Reddit") + 
+            ylab("Excess Droup-Outs Associated with SI") +
+            ggtitle("Posterior Credible Intervals for Total SI-Associated Drop-Outs") 
 ```
+
+Given the discrepancy in conclusions we would draw between a large prior and small prior, we reccomend that a small prior be used for the following reason: large prior probabilities of dropping out inflate author-specific posterior probabilities of dropping out with artificial evidence. If instead we use a small prior-probability of dropping out, our posterior estimate that a given author has dropped out relies more heavily on their data: whether the time since an author's most recent post is unusually high compared to their post history. Hence, the estimates of total number of drop-outs among SI-postitive and SI-negative authors respectively is (1) more conservative and (2) requires more data-based evidence. Consequently, the difference in estimated drop-out rates between SI-positive and SI-negative authors is driven more by the data and less by the prior. 
+
+In our previous results, we present a credible interval derived from a prior of $10^-5$ for this reason. The interpretation of this prior is as follows: without seeing any data, we would expect about 0.01 of our approximate 1,000 authors to drop out of reddit. 
 
 # Discussion
 
@@ -223,6 +246,17 @@ We do not differentiate between suicidal ideation and suicide notes.
 
 We also cannot observe unsuccessful suicide attempts.
 
+We only estimate the proposed parameter for one month of data. We do not propose a framework for extending this estimation longitudionally. 
+
+Do we continue to follow users from June to see if they post more often and adjust their drop-out probabilities accordingly?
+
+Why did we choose three months? We could have chosen a shorter or longer interval. If the interval gets longer, our estimates should become more and more accurate...
+
+The times between posts are more likely a mixture of exponentials rather than just one exponential...
+
+This method should be examined jointly with a number of other month-to-month characteristics of online communities such as the total number of authors, the total number of authors that express suicidal ideation, etc.
+
+How to deal with people who post comments with suicidal ideation over time?
 
 # Works Cited
 
@@ -233,5 +267,11 @@ We also cannot observe unsuccessful suicide attempts.
 * Predicting Postpartum Changes in Emotion and Behavior via Social Media (2013) http://www.munmund.net/pubs/chi_13.pdf
 
 * Social Media Embraces Suicide Prevention CMAJ August 11, 2015 vol. 187 no. 11 First published June 29, 2015, doi: 10.1503/cmaj.109-5104 http://www.cmaj.ca/content/187/11/E333.short 
+
+* http://www.cdc.gov/violenceprevention/suicide/definitions.html
+
+* https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2576496/
+
+http://www.cdc.gov/violenceprevention/suicide/definitions.html
 
 
