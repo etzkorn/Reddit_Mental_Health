@@ -1,0 +1,90 @@
+---
+title: "Supplemental Details"
+author: "Lacey Etzkorn"
+date: "October 26, 2016"
+output: 
+      html_document:
+            toc: TRUE
+---
+
+# Data Collection
+
+The goal of our analysis is to estimate the expected number of drop-outs attributable to SI among June /r/Depression authors. The process of collecting the necessary data and estimating this parameter can be broken down into 4 modular steps:
+
+1. **Collect all posts and comments from /r/depression in June 2016. **
+We use the package subredditarchive, and modify the existing code from the python script here: https://github.com/peoplma/subredditarchive. The modified code that we used to scrape the June data can be found in 
+[Scripts/0_Scrape_June_Data.py](Scripts/0_Scrape_June_Data.py).
+Parse the json files for each thread for the main post and comments. For each, grab information on author, title (if applicable), text, creation date, name/link id, etc. 
+(See code: [Scripts/1_Read_Json_Files.R](Scripts/1_Read_Json_Files.R))
+
+2. **Combine and Classify June.**
+Combine post and comment data into one data frame where the level of each observation is either a post or comment. Classify whether each post or comment from contained evidence of SI. (See [SI Classification](#si-classification)). 
+Label authors as SI-positive if they had any posts or comments with SI in June 2016 /r/depression. Otherwise they are SI-negative. List unique SI-positive authors.
+(See code: [Scripts/2_Combine_Classify_June_Posts_Comments.R](Scripts/2_Combine_Classify_June_Posts_Comments.R))
+
+3. **Scrape Author Data.**
+Collect all available post and comment data for every SI-positive authors. Collect all available post and comment data for a similar-sized simple random sample of SI-negative authors. We collected ours at 4pm on October 10, 2016.
+(See code: [Scripts/3.1_Scrape_User_Data.R](Scripts/3.1_Scrape_User_Data.R) and
+[Scripts/3.2_Scrape_NoSI_User_Data.R](Scripts/3.2_Scrape_NoSI_User_Data.R))
+
+4. **Drop-Out Estimation.** Estimate the expected number of drop-outs attributable to SI. 
+(See derivation: [Estimation of Drop-Out Totals](#estimation-of-drop-out-totals), 
+see code: [Scripts/6_MC_Estimation.R](Scripts/6_MC_Estimation.R))
+
+5. If a bayesian approach was used, examine the relationship between the estimate and the priors.
+
+
+
+# Estimation of Drop-Out Totals
+
+Derivation:
+
+Let $i$ index the authors. Let $Q_i$ be the (unobserved) event that author $i$ has quit Reddit. Let $t_i$ be the time since observing the most recent post from author $i$. Let $y_i$ be the (unobserved) length of time from the most recent post to the next post in the future. If author $i$ has quit Reddit, then $y_i = \infty$. Let $n_i$ be the observed number of intervals between posts for author $i$. Let $\bar{\epsilon_i}$ be the observed average time between Reddit posts for author $i$. Let $SI_i$ be the (unobserved) indicator that author $i$ dropped off of Reddit. Let $\rho$ be the prior probability (which we define) that any author drops out of Reddit.
+
+Our goal is to do monte-carlo sampling from the posterior distribution of 
+$E(\sum_i Q_i | SI_i=1) - E(\sum_i Q_i | SI_i=0)$.
+
+First assume that the post histories of each author are a Poisson process, and so observed times between posts are exponentially distributed with parameter $\lambda_i$. For each $\lambda_i$, specify the prior distribution $\lambda_i \sim gamma(1,1)$. 
+Hence the posterior for $\lambda_i$ is 
+$\lambda_i \big |n_i,\bar{\epsilon_i} \sim gamma(n_i + 1, 1 + n_i\cdot\bar{\epsilon_i})$. [CITE RESULT].
+
+Given $\lambda_i$ and prior $\rho$, we are able to calculate the probability that the author has stopped using Reddit using Bayes Rule.
+$$ P(Q_i|\lambda_i, y_i > t_i, t_i, \rho)
+            =  \frac{P(y_i > t_i| Q_i, \lambda_i, t_i, \rho) \cdot \rho}
+                        {P(y_i > t_i|\lambda_i, t_i, \rho)}
+            =   \frac{\rho} {e^{-\lambda_i\cdot t_i} \cdot (1-\rho) + \rho} 
+$$ 
+Note that $P(y_i > t_i| Q_i, \lambda_i, t_i, \rho) = 1$ since $y_i = \infty$ for the event $Q_i$. Also note that marginal to $Q_i$, $y_i$ follows a mixture of infinity with probability $\rho$ and an exponential with parameter $\lambda_i$ and probability $\rho$.
+
+Now, if we consider each $Q_i$ to be independent, and we are given $P(Q_i|\lambda_i, y_i > t_i, t_i, \rho)$ for each author, then 
+$$E(\sum_i Q_i| SI_i = 1) - E(\sum_i Q_i| SI_i = 0) = 
+      \sum_i (-1)^{SI_i +1} P(Q_i|\lambda_i, y_i > t_i, t_i, \rho)$$
+
+Hence, using these formulas, we can generate monte-carlo samples from the posterior distribution for the expected number of drop-outs attributable to SI.
+
+# SI Classification
+
+Phrase Recipes: 
+
+* [I am] [intending to] [suicide verb]
+
+* [I am] [thinking about] [suicide noun]
+
+* I [intend to] [suicide verb]
+
+* I [suicide verb]
+
+* [I am] [suicide adjective]
+
+* Why not [suicide verb]
+
+* I [think about] [suicide noun]
+
+* me [suicide verb]
+
+* me [suicide noun]
+
+* I [oppose] [live noun]
+
+* I [am opposed to] [living]
+

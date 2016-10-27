@@ -1,13 +1,27 @@
-load(file="Data/Training_Lacey2.RData")
+load(file="Data/June_Depression_Sample/June_Posts_Classified.RData")
+require(dplyr)
 
-for(i in 1:nrow(lacey2)){
-      writeLines(paste(lacey2[i,"title"],"\n",
-          lacey2[i,"post.text"], "\n",
-          lacey2[i,"suicidal"]))
-      lacey2$suicidal[i] <- readline(prompt="Current Suicide Ideation (0,1):") 
+### Sample 100 of each SI-positive and SI-negative
+      si.positive.sample = 
+            filter(user.data, si) %>%
+            sample_n(100)
+      
+      si.negative.sample =
+            filter(user.data, !si) %>%
+            sample_n(100)
+      
+      test.sample = rbind(si.negative.sample, si.positive.sample)
+
+rm(user.data, si.positive.sample, si.negative.sample)
+
+for(i in 1:nrow(test.sample)){
+      cat(test.sample[i,"text"], "\n")
+      test.sample$suicidal[i] <- readline(prompt="Current Suicide Ideation (0,1):") 
+      test.sample$phrase[i] <- readline(prompt="SI evidence:") 
 }
 
-save(lacey2, file="Data/Training_Lacey2_Classified.RData")
+test.sample$suicidal[!test.sample$phrase ==""] <- 1
+test.sample$suicidal[test.sample$suicidal ==""] <- 0
+test.sample$suicidal[!test.sample$suicidal %in% c("0","1")] <- test.sample$phrase[!test.sample$suicidal %in% c("0","1")] 
 
-table(lacey2$suicidal)
-
+save(test.sample, file="Data/Test/Test_Classified.Rdata")

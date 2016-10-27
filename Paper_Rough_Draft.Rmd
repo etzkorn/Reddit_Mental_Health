@@ -14,6 +14,12 @@ options(digits = 4)
 load("Data/SI_Author_Sample/June_Authors_Combined.RData")
 ```
 
+Collaborators: Linda Gai
+
+Peer Editors: Guanghao Qi, Matt Cole
+
+Supplemental Materials: [Supplement](Supplement.html).
+
 # Introduction
 
 The problem of suicide plagues social media and online communities devoted to mental health. [add context] 
@@ -66,63 +72,33 @@ Using this method, we generate monte-carlo samples from the posterior distributi
 
 ### SI Classification
 
-The goal for our classification algorithm is to determine whether comments and posts contain expressions of suicidal ideation. From these classifications, we produce a set of authors that express SI in June /r/Depression. 
+##### SI Definition
 
-The CDC defines suicidal ideation, or thoughts about suicide, as "thoughts of engaging in suicide-related behavior" [cite] and "Thinking about, considering, or planning suicide." [cite]. We broaden this definition for our analysis to the following:
+The goal for our classification algorithm is to determine whether comments and posts contain expressions of suicidal ideation (SI). From these classifications, we produce a set of authors that express SI in June /r/Depression. 
 
-      Suicidal Ideation: Thinking about, considering, or planning suicide; desire to die; desire to stop living; or engagement in highly dangerous activities or self harm with the implicit goal of ending life. Suicidal ideation does not include hating or frustration with one's own life, extreme anguish or psychological distress, or engagement in highly dangerous activities or self harm where there is no implicit goal of ending one's life.
+The CDC defines suicidal ideation, or thoughts about suicide, as "thoughts of engaging in suicide-related behavior" [cite] and "Thinking about, considering, or planning suicide." [cite]. For our analysis, we change this definition to the following:
 
-It is important to note that we expected SI expression to be fairly rare among /r/Depression posts. Thus, in order to get a good estimate of the difference in drop-out rates between true SI-positive and true SI-negative authors, we wanted our SI-positive sample to have a minimal proportion of true SI-negative authors. However, we were not worried about true SI-positive authors tainting our SI-negative sample since we expected SI-positive users to be so rare. In other words, we wanted a highly specific algorithm at the sacrifice of sensitivity.
+We define suicidal ideation (SI) as thinking about, considering, or planning suicide; desire to die; desire to stop living; or engagement in highly dangerous activities or self harm with the implicit goal of ending life. It may include admissions of having suicidal ideation in the past or the potential for suicidal ideation in the future. Evidence of suicidal ideation does not follow from hating or frustration with one's own life, extreme anguish or psychological distress, or engagement in highly dangerous activities or self harm where there is no implicit goal of ending one's life. However, explicit statements about wanting to die or engage in suicide are taken literally.
 
-We read through a sample of 750 randomly selected comments and posts from June /r/Depression, and we classify SI according to the definition above. From each of the SI-positive comments, we extract the smallest phrase(s) that contained evidence of SI. Examples of these phrases include: 
+We change our definition of suicidal ideation to make it clearer what kinds of Reddit comments may constitute SI. For example, the phrase "I don't want to live." does not fall under the CDC SI definition since there is no explicit thoughts of lethal self-harm. Rather, this statement expresses SI through a double-negative. While this definition does not fit a traditional definition of SI, we include these kinds of comments because Reddit moderators may be equally worried about authors who express these comments. 
 
-* "I think about suicide"
+##### The Algorithm
 
-* "I just don't want to live""
+A number of methods have been implemented to detect suicidal ideation from user-generated text on social media [CITE]. However, for simplicity, we do not use them here.
 
-* "I have struggled with depression and suicidal thoughts"
+We expected SI expression to be fairly rare among /r/Depression posts. Thus, in order to get a good estimate of the drop-out risk attributable to SI, we wanted our SI-positive sample to have a minimal proportion of true SI-negative authors. However, we were not worried about true SI-positive authors tainting our SI-negative sample since we expected SI-positive author to be so rare, and hence not have much influence on our estimate of the SI-negative drop-out risk. In other words, we wanted a highly specific algorithm at the sacrifice of sensitivity.
 
-* "my suicide plan"
+With an intent to achieve this goal, we design an algorithm that searches post text for at least one phrase from an explicit list of SI-expressive phrases that constitute strong evidence of suicidal ideation [Supplement Reference]. 
 
-* "I still feel like blowing my brains out"
-
-We then categoize collected phrases into twelve linguistically distinct modes of expressing SI. We discarded phrases that we felt were too linguistically complex for any classification algorithm to handle. The twelve modes are:
-
-* [I am] [intending to] [suicide verb]
-
-* [I am] [thinking about] [suicide noun]
-
-* I [intend to] [suicide verb]
-
-* I [suicide verb]
-
-* [I am] [suicide adjective]
-
-* Why not [suicide verb]
-
-* I [think about] [suicide noun]
-
-* me [suicide verb]
-
-* me [suicide noun]
-
-* I [oppose] [live noun]
-
-* I [am opposed to] [living]
-
-The phrases or words in brackets represent a broader class of phrases that could be inserted in it's place. For example, [suicide verb] could be replaced with any of the following phrases to still consitute evidence of SI expression: 
+These phrases were derived from a random sample of 750 June 2016 /r/Depression comments. Human classifiers read through each comment, labeled whether it contained SI expression, and recorded the smallest phrase(s) from that comment that the classifier felt constituted evidence of SI. We then organized the phrases into twelve categories, and noted in brackets where words could be exchangable. For example, [suicide verb] could be replaced with any of the following phrases to still consitute evidence of SI: 
 
       die, commit suicide, kill myself, off myself, end my life, no longer be here, take some pills, leave this world, end it, blow my brains out, kicked the bucket, kick the bucket, cut my throat, hang myself
 
-For each of these modes of SI expression, we generate all possible combinations of phrases. After all phrases for all 12 modes of SI expression have been generated, we remove all punctuation and spacing from both the post text and the phrase text. We combine all phrases into a regular expression using the or "|" operator, and then use the function "grepl" to test whether each post contains any phrase.
-
 # Results
 
-### June /r/depression
+### June /r/Depression
 
-For the month of June, /r/depression contained 22,041 posts, representing contributions from 7,572 authors. We identified 547 SI-positive posts from 492 unique users. 
-
-In a sample of 100 SI-positive posts, [n] did not have true SI evidence. In a sample of 100 SI-negative posts, [n] did have SI evidence. 
+For the month of June, /r/depression contained 22,041 posts, representing contributions from 7,572 authors. We identified 547 SI-positive posts from 492 unique authors. In a simple random sample of 100 SI-positive posts, 12 did not have true SI evidence. In a simple random sample of 100 SI-negative posts, 4 did have true SI evidence. 
 
 ### User Follow-Up
 
@@ -158,67 +134,34 @@ scale_size_manual(values = c(0.1,0.1,0.3)) +
 scale_alpha_manual(values = c(0.1,0.1,1)) + 
 theme_bw() + facet_wrap("si.group")
 ```
+**Figure 1:** *Post histories for SI-Positive authors and SI-Negative authors are different.* 
+The post histories for our authors are depicted above. Each y value represents a unique author id, sorted by the time of their most recent post. Each x value represents the date of a post. Hence, we can read each horizontal line on this plot as the post history of one author. Red points represent SI-positive posts. Blue points represent posts in the /r/depression subreddit. Grey posts represent posts elsewhere on Reddit. 
 
-After scraping the post history for each of the SI-positive users, we find no post or comment data for 1 author, and we find 16 authors whose full history was not available back to April 2016. We are left with 475 authors. 
-
-The post histories for our 475 authors are depicted above. Each y value represents a unique author id, sorted by the time of their most recent post. Each x value represents the date of a post. Hence, we can read each horizontal line on this plot as the post history of one author. Red points represent SI-positive posts. Blue points represent posts in the /r/depression subreddit. Grey posts represent posts elsewhere on Reddit. There a number of important features in this plot. First, we note that those authors who posted more recently tended to post more often, which is expected. Second we see that many authors made multiple SI-positive posts. Third, we see that nearly 170 of our 475 authors had their last post in June, which was the period that we used to sample from. Fourth, of these 170 authors, many did not post frequently before dropping-off Reddit. However, a hand-full of them had posted frequently, and their drop-put is therefore suspicious.
+There a number of important features in this plot. First, we note that those authors who posted more recently tended to post more often, which is expected. Second we see that many authors made multiple SI-positive posts. Third, we see that nearly 170 of our 475 authors had their last post in June, which was the period that we used to sample from. Fourth, of these 170 authors, many did not post frequently before dropping-off Reddit. However, a hand-full of them had posted frequently, and their drop-put is therefore suspicious.
 
 ### Drop-Out Rate Estimates
 
 The histogram below represents the posterior distribution for the rate of drop-outs for authors whose June /r/depression comments were SI-positive.
 
 ```{r, echo=FALSE, warning=FALSE}
-### Load Data
-      author.summary = 
-            user.data %>% 
-            group_by(author) %>%
-            summarise(n = n()-1,
-                      eps.bar = mean(time.last, na.rm=T),
-                      t = as.numeric(october10 - max(date)),
-                      si.author = si.author[1])
-            filter(author.summary, !t < 150)
-      n = author.summary$n
-      eps = author.summary$eps.bar
-      eps[is.na(eps)] = 0 
-      t = author.summary$t
-      N = nrow(author.summary)
-      si = author.summary$si.author
-### Simulate Mu given Data
-      alpha = 1; beta = 1
-      mu = replicate(n = 10000, rgamma(N, shape = alpha + n, rate = beta + n*eps))
-### Now get overall credible interval for sum(Q)
-      prior.p = 10^-10
-      make.p = function(mu,p,t) p / (exp(-mu*t)*(1-p) + p)
-      post.si = colSums(apply(mu[si,], 2, make.p, p=prior.p, t=t[si]))
-      post.nosi = colSums(apply(mu[!si,], 2, make.p, p=prior.p, t=t[!si]))/sum(!si)*sum(si)
-      post.excess = post.si - post.nosi
-      hist(post.excess, main = "Posterior Distribution for\nExpected Reddit Drop-Outs per 100 SI-Positive Authors\n(Prior = 10e-4)",
-           xlab="", ylab="")
-      ci = quantile(post.excess, probs = c(0.025, 0.975))
+load("Data/Posteriors/Attributable_10e-10.Rdata")
+hist(post.excess, 
+     main = "Posterior Distribution for\nExpected Reddit Drop-Outs per 100 SI-Positive Authors\n(Prior = 10e-4)",
+     xlab="", ylab="")
+ci = quantile(post.excess, probs = c(0.025, 0.975))
 ```
 
 Our 95% credible interval is (`r ci`), meaning there is a 95% probability that the expected rate of drop-out is between `r ci[1]` and `r ci[2]`.
 
 ### Sensitivity to Priors
 
-We found that our conclusions were highly sensitive to our specified prior probability of drop-outs. The plot below shows posterior credible intervals for the expected number of excess dropouts among authors who penned SI-positive posts in June /r/depression.
+We found that our conclusions were sensitive to our specified prior probability of drop-outs. The plot below shows posterior credible intervals for the expected number of excess dropouts among authors who penned SI-positive posts in June /r/depression.
 
 If we set our prior probability of dropping out equal to 0.5, we would conclude that among the 491 authors who wrote SI-postitive posts in June /r/depression, there were only about 14 excess reddit drop-outs. However, when we set our prior probability of dropping out below $10^{-5}$, our estimates for excess dropouts associated with SI are in the range of 45 to 55.
 
 ```{r, echo=FALSE, warning=FALSE}
-### Calculate P(Q) from Mu and data
-      prior.p = 10^-seq(0.5,15.5, by=0.5)
-      post_p = sapply(prior.p, FUN = function(x){
-            post.si = colSums(apply(mu[si,], 2, make.p, p=x, t=t[si]))
-            post.nosi = colSums(apply(mu[!si,], 2, make.p, p=x, t=t[!si]))/sum(!si)*sum(si)
-            post.excess = post.si - post.nosi
-            return(quantile(post.excess, probs = c(0.025, 0.5, 0.975)))
-      })
-      colnames(post_p) = paste0("p10e-", seq(0.5,15.5, by=0.5))
-      #post_p = cbind(Percentile = rownames(post_p), as.data.frame(post_p))
-      #post_p = melt(post_p, id.vars = "Percentile", 
-      #              variable.name = "Prior P",
-      #              value.name = "Estimate")
+      load("Data/Posteriors/Attributable_All.Rdata")
+      load("Data/Posteriors/Priors_All.Rdata")
       ggplot() +
             geom_errorbar(aes(ymax = post_p[3,], ymin = post_p[1,], x=prior.p)) +
             geom_point(aes(y= post_p[2,], x=prior.p)) + 
