@@ -98,11 +98,11 @@ These phrases were derived from a random sample of 750 June 2016 /r/Depression c
 
 ### June /r/Depression
 
-For the month of June, /r/depression contained 22,041 posts, representing contributions from 7,572 authors. We identified 547 SI-positive posts from 492 unique authors. In a simple random sample of 100 SI-positive posts, 12 did not have true SI evidence. In a simple random sample of 100 SI-negative posts, 4 did have true SI evidence. 
+For the month of June, /r/depression contained 22,041 posts, representing contributions from 7,572 authors. We identified 547 SI-positive posts from 492 unique authors. In a simple random sample of 100 SI-positive posts, and 100 SI-positive posts, we estimated the positive predictive value to be 88% (80%, 94%) and the negative predictive value to be 96% (90%, 99%).
 
 ### User Follow-Up
 
-```{r , echo=FALSE, message=FALSE, warning=FALSE, fig.width=10}
+```{r , echo=FALSE, message=FALSE, warning=FALSE, fig.width=13, fig.height=6}
 user.data = 
       author.summary %>%
       group_by(author) %>%
@@ -116,7 +116,7 @@ user.data =
 user.data$point.label = 
       ifelse(user.data$class, "SI",
       ifelse(user.data$r.depression, "/r/depression","other")) %>%
-      ordered(labels = c("other", "/r/depression", "SI"))
+      ordered(labels = c("Other Subreddit", "/r/Depression", "SI Expressive"))
 user.data$si.group = 
       ifelse(user.data$si.author, "SI-Positive in June /r/depression",
              "SI-Negative in June /r/depression")
@@ -125,51 +125,76 @@ ggplot(data = subset(user.data, date > jan1)) +
 geom_point(aes(y=rank_newest,x=date, 
                color=point.label, alpha=point.label, 
                size=point.label)) + 
-ggtitle("Distribution of Post Dates across Authors\nbetween Jan. and Oct.") +
+ggtitle("Distribution of Post Dates across Authors between Jan. and Oct.") +
 ylab("Author Rank by Newest Post") + xlab("Date") +
-geom_vline(aes(xintercept = as.numeric(july1)), alpha=0.3) + 
-geom_vline(aes(xintercept = as.numeric(june1)), alpha=0.3) + 
-scale_colour_manual(values = c("grey","darkblue", "red")) + 
-scale_size_manual(values = c(0.1,0.1,0.3)) + 
-scale_alpha_manual(values = c(0.1,0.1,1)) + 
-theme_bw() + facet_wrap("si.group")
+geom_vline(aes(xintercept = as.numeric(july1)), alpha=0.5) + 
+geom_vline(aes(xintercept = as.numeric(june1)), alpha=0.5) + 
+scale_colour_manual(name = "Post\nCharacteristics",
+                    values = c("grey","darkblue", "red")) + 
+scale_size_manual(name = "Post\nCharacteristics",
+                  values = c(0.1,0.1,0.3)) + 
+scale_alpha_manual(name = "Post\nCharacteristics",
+                   values = c(0.1,0.1,1)) + 
+theme_bw(20) + 
+theme(legend.key = element_blank(),
+      legend.position=c(1,0),
+      legend.justification = c(1,0),
+      legend.background = element_rect(fill=alpha('grey', 0)))+
+facet_wrap("si.group") +
+guides(color = guide_legend(override.aes = list(size=5, alpha = 1))) 
+      
 ```
-**Figure 1:** *Post histories for SI-Positive authors and SI-Negative authors are different.* 
-The post histories for our authors are depicted above. Each y value represents a unique author id, sorted by the time of their most recent post. Each x value represents the date of a post. Hence, we can read each horizontal line on this plot as the post history of one author. Red points represent SI-positive posts. Blue points represent posts in the /r/depression subreddit. Grey posts represent posts elsewhere on Reddit. 
 
-There a number of important features in this plot. First, we note that those authors who posted more recently tended to post more often, which is expected. Second we see that many authors made multiple SI-positive posts. Third, we see that nearly 170 of our 475 authors had their last post in June, which was the period that we used to sample from. Fourth, of these 170 authors, many did not post frequently before dropping-off Reddit. However, a hand-full of them had posted frequently, and their drop-put is therefore suspicious.
+**Figure 1: Post histories for SI-Positive authors and SI-Negative authors are different.** Author ids are sorted along the y axis by time of the most recent post. Dates of posts are sorted along the x axis. Each horizontal strip of points represents a user history. Posts are red if they contain SI expression, regardless of their subreddit. Posts without SI expression are blue if they are in the subreddit /r/Depression, or they are otherwise grey. Vertical grey lines outline the month of June, from which data was sampled.
+
+Figure 1 reveals a number of characteristics about the authors in our study. First, we note that those authors who posted more recently tended to post more often, which is expected. Second we see that many authors made multiple SI-positive posts, even among the group that was SI-negative in June /r/depression.
+
+Figure 1 also illuminates a number of important differences between the SI-positive and SI-negative groups. The figure shows that nearly 170 of our 491 authors had their last post in June, which was the period that we used to sample from. In comparison, only about 100 of the SI-negative authors had their last post in June. Fourth, of these 170 authors, many did not post frequently before dropping-off Reddit.
 
 ### Drop-Out Rate Estimates
 
-The histogram below represents the posterior distribution for the rate of drop-outs for authors whose June /r/depression comments were SI-positive.
-
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, fig.height=4, fig.width=5}
 load("Data/Posteriors/Attributable_10e-10.Rdata")
-hist(post.excess, 
-     main = "Posterior Distribution for\nExpected Reddit Drop-Outs per 100 SI-Positive Authors\n(Prior = 10e-4)",
-     xlab="", ylab="")
 ci = quantile(post.excess, probs = c(0.025, 0.975))
 ```
 
-Our 95% credible interval is (`r ci`), meaning there is a 95% probability that the expected rate of drop-out is between `r ci[1]` and `r ci[2]`.
+The histogram below represents the posterior distribution for the rate of drop-outs for authors whose June /r/depression comments were SI-positive.
+Our 95% credible interval is (`r ci`). Hence, there is a 95% probability that the expected SI-attributable drop-outs for authors in June 2016 /r/Depression is between `r ci[1]` and `r ci[2]`.
+
+```{r, echo=FALSE, warning=FALSE, message=F,fig.height=4, fig.width=5}
+ggplot() +
+geom_histogram(aes(x=post.excess),  
+               color="black", fill="blue", alpha=0.7) +
+ggtitle("Posterior Distribution for\nSI-Attributable Drop-Outs (Prior = 10e-4)")+
+xlab("Expected Number of SI-Attributable Drop-Outs") + 
+ylab("Count") + 
+theme_bw(12)
+```
+
+**Figure 2: 10,000 Posterior Monte-Carlo Samples for the Expected Number of SI-Attributable Drop-Outs.**
 
 ### Sensitivity to Priors
 
-We found that our conclusions were sensitive to our specified prior probability of drop-outs. The plot below shows posterior credible intervals for the expected number of excess dropouts among authors who penned SI-positive posts in June /r/depression.
+We found that our conclusions were sensitive to our specified prior probability that any author dropped out. The plot below shows posterior credible intervals for the expected number of SI-attributable drop-outs in June /r/depression.
 
-If we set our prior probability of dropping out equal to 0.5, we would conclude that among the 491 authors who wrote SI-postitive posts in June /r/depression, there were only about 14 excess reddit drop-outs. However, when we set our prior probability of dropping out below $10^{-5}$, our estimates for excess dropouts associated with SI are in the range of 45 to 55.
+If we set our prior probability of dropping out equal to 0.5, we would conclude that among the 491 authors who wrote SI-postitive posts in June /r/Depression, there were only about 14 excess reddit drop-outs. However, when we set our prior probability of dropping out below $10^{-5}$, our estimates for excess dropouts associated with SI are in the range of 45 to 55.
 
 ```{r, echo=FALSE, warning=FALSE}
-      load("Data/Posteriors/Attributable_All.Rdata")
-      load("Data/Posteriors/Priors_All.Rdata")
-      ggplot() +
-            geom_errorbar(aes(ymax = post_p[3,], ymin = post_p[1,], x=prior.p)) +
-            geom_point(aes(y= post_p[2,], x=prior.p)) + 
-            scale_x_log10() + 
-            xlab("Prior Probability of Quitting Reddit") + 
-            ylab("Excess Droup-Outs Associated with SI") +
-            ggtitle("Posterior Credible Intervals for Total SI-Associated Drop-Outs") 
+load("Data/Posteriors/Attributable_All.Rdata")
+load("Data/Posteriors/Priors_All.Rdata")
+library(scales)
+ggplot() +
+geom_errorbar(aes(ymax = post_p[3,], ymin = post_p[1,], x=prior.p)) +
+geom_point(aes(y= post_p[2,], x=prior.p)) + 
+scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
+              labels = trans_format("log10", math_format(10^.x))) + 
+theme_bw(16) + 
+xlab("Prior Probability of Quitting Reddit") + 
+ylab("Expected SI-Attributable Drop-Outs") +
+ggtitle("Posterior Credible Intervals for\nTotal SI-Attributable Drop-Outs") 
 ```
+
+**Figure 3: Posterior credible intervals for SI-attributable drop-outs across many priors.** Each point represents a posterior median for SI-attributable drop outs, while bars represent 2.5% and 97.5% quantiles. Prior probabilities of dropping out range from $\rho = 0.5$ to $\rho=10^{-15.5}$
 
 Given the discrepancy in conclusions we would draw between a large prior and small prior, we reccomend that a small prior be used for the following reason: large prior probabilities of dropping out inflate author-specific posterior probabilities of dropping out with artificial evidence. If instead we use a small prior-probability of dropping out, our posterior estimate that a given author has dropped out relies more heavily on their data: whether the time since an author's most recent post is unusually high compared to their post history. Hence, the estimates of total number of drop-outs among SI-postitive and SI-negative authors respectively is (1) more conservative and (2) requires more data-based evidence. Consequently, the difference in estimated drop-out rates between SI-positive and SI-negative authors is driven more by the data and less by the prior. 
 
@@ -181,25 +206,20 @@ Online communities present a unique platform where people can address their own 
 
 A online community such as the depression subreddit provides a unique opportunity for researchers to glimpse into the thoughts of people with depression outside of a clinical setting. The depression subreddit is a public community where users do not need to present any identifiable information. 
 
-### Limitations
+### Future Work
 
-For this method, we only incorporate user specific information as the time between posts. However, a number of other factors might give us information about whether a user actually attempts suicide. Sentiment might matter. Recent SI posts might matter. Actual suicide notes might matter.
+We list a number of extensions and adjustments for this project in order of priority.
 
-We do not differentiate between suicidal ideation and suicide notes. 
+First, we need to adjust our estimates to account for the error in our SI classification algorithm. (See [June \r\Depression](#june-/r/depression).) Not knowing whether each author truly expressed SI in their text data should inflate the uncertainty of the estimate.
 
-We also cannot observe unsuccessful suicide attempts.
+Second, we need to propose a framework for extending our estimation longitudionally. Community moderators will want to measure SI-attributable drop-outs before and after interventions. However, it is not yet clear how we will measure SI-attributable drop-outs over time, especially when so many authors repeatedly express SI. In this paper, we only estimate the SI-attributable drop-outs for June 2016 authors with data collected at a single time point (October 10, 2016). 
 
-We only estimate the proposed parameter for one month of data. We do not propose a framework for extending this estimation longitudionally. 
+Third, our method does not properly account for counfounding relationships between SI and droping out. For example, moderators ban authors for "trolling." If being banned for trolling is more prevalent among SI-negative (or SI-positive) authors, our estimate of the drop-outs attributable to SI will be biased downward (or upward).
 
-Do we continue to follow users from June to see if they post more often and adjust their drop-out probabilities accordingly?
+Fourth, we need to better assess the fit of our model to the observed data. We use a parametric Bayesian approach to estimate each author's individual probability of having dropped out. In this framework, we assumed that times between an author's posts follow an exponential distribution. However, mixture of exponential distributions with adjustments for temporal trends may better fit the data. 
 
-Why did we choose three months? We could have chosen a shorter or longer interval. If the interval gets longer, our estimates should become more and more accurate...
+Fifth, we ignore the information the author's text may contain about dropping out or attempting suicide. For example, we do not differentiate between suicidal ideation and suicide plans. A body of psychological literature documents the importance of accounting for and quantifying suicidal intent and planning when examining suicide risk [CITE]. However, attempting to mine such psychological measures from a large amount of text data is far beyond the scope of this paper and easily beyond the frontiers of psychological science and machine learning.
 
-The times between posts are more likely a mixture of exponentials rather than just one exponential...
-
-This method should be examined jointly with a number of other month-to-month characteristics of online communities such as the total number of authors, the total number of authors that express suicidal ideation, etc.
-
-How to deal with people who post comments with suicidal ideation over time?
 
 # Works Cited
 
