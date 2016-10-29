@@ -74,11 +74,13 @@ user.data %>%
 
 # SI Classification
 
-A number of methods have been implemented to detect suicidal ideation from user-generated text on social media [1]. However, here we use a simpler algorithm and leave the implementation of these other classifiers as a future project.
+We implement an algorithm that searches post text for at least one phrase from a reference list of SI-expressive phrases. We generated our reference list by programatically expanding a sample of SI-expressive phrases which were hand-picked from 750 random June /r/Depression comments.
 
-We expected SI expression to be fairly rare among /r/Depression posts. Thus, in order to get a good estimate of the drop out risk attributable to SI, we wanted our SI-positive sample to have a minimal proportion of true SI-negative authors. However, we were not worried about true SI-positive authors tainting our SI-negative sample since we expected SI-positive author to be so rare, and hence not have much influence on our estimate of the SI-negative drop out risk. In other words, we wanted a highly specific algorithm at the sacrifice of sensitivity.
+The sample of SI-expressive comments from the 750 posts is here: 
+[Data/Training/suicidal_phrases.txt](Data/Training/suicidal_phrases.txt)
 
-To achieve this goal, we implement an algorithm that searches post text for at least one phrase from a reference list of SI-expressive phrases. We generated our reference list by programatically expanding a sample of SI-expressive phrases which were hand-picked from 750 random June /r/Depression comments. The algorithm is detailed in [Supplement/SI Classification](Supplement.html).
+We first organize the phrases into linguistic patterns. There seemed to be twelve types of phrases, or phrase "recipes", people used to express suicidal ideation. Each "recipe" is made up of ingredients, or smaller phrases/words that can be exchanged to convey the same meaning. The recipes are listed below. 
+The ingredients are listed in the file [Scripts/99_Suicide_Syntax.txt](Scripts/99_Suicide_Syntax.txt).
 
 Phrase Recipes: 
 
