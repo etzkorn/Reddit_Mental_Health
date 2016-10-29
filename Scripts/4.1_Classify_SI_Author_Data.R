@@ -27,7 +27,7 @@ user.data =
       rbind(user.post.data, user.comment.data)
 
 ### Get phrases
-source("Scripts/SI_Classification/ideation_phrases.R")
+source("Scripts/99_ideation_phrases.R")
       key.phrases = clean.text(key.phrases)
       key.phrases = key.phrases[nchar(key.phrases) > 8]
       key_phrase_regex = paste(key.phrases, collapse="|")

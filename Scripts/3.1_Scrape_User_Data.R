@@ -1,6 +1,6 @@
 
 ### get functions
-      source(file="Scripts/functions_scrape_reddit_comment.R")
+      source(file="Scripts/3.3_Scrape_Functions.R")
       load(file = "Data/June_Depression_Sample/June_Unique_NoSI_Authors.RData")
       authors.noSI = na.omit(authors.noSI)
       
@@ -21,4 +21,4 @@ for(user in authors.noSI){
 }
 rm(comm.vars, get_reddit_user, post.vars, replace_null, 
    user, user_data_frame, user.comments, user.submitted)
-save.image(file = "Data/June_NoSI_Authors_Data.RData")
+save.image(file = "Data/SI_Author_Sample/June_NoSI_Authors_Data.RData")

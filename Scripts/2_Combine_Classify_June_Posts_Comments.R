@@ -1,5 +1,5 @@
 ### Setup
-      load(file="Data/June_NoSI_Authors_Data.RData")
+      load(file="Data/June_Depression_Sample/June_Posts.RData")
       library(dplyr)
       
 ### Define Functions
@@ -18,7 +18,7 @@
       rm(comm.data, post.data, get.date)
       
 ### Classify Suicide Ideation
-      source("Scripts/2.2_SI_Classification/ideation_phrases.R")
+      source("Scripts/99_ideation_phrases.R")
       
       ### Get phrases
             key.phrases = clean.text(key.phrases)

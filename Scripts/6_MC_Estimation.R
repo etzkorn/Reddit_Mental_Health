@@ -10,7 +10,7 @@
                       eps.bar = mean(time.last, na.rm=T),
                       t = as.numeric(october10 - max(date)),
                       si.author = si.author[1]) %>%
-            filter(t < 150)
+            filter(t < as.numeric(october10-june1))
       n = author.summary$n
       eps = author.summary$eps.bar
       eps[is.na(eps)] = 0 
